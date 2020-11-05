@@ -7,6 +7,7 @@
  *  !!!!!!! SOURCE GETS TRANSPILED BY TYPESCRIPT. EDIT TS FILE ONLY. !!!!!!!
  *
  * */
+'use strict';
 import A from '../Core/Animation/AnimationUtilities.js';
 var setAnimation = A.setAnimation;
 import BaseSeries from '../Core/Series/Series.js';
@@ -15,12 +16,17 @@ var getStartAndEndRadians = CenteredSeriesMixin.getStartAndEndRadians;
 import H from '../Core/Globals.js';
 var noop = H.noop;
 import LegendSymbolMixin from '../Mixins/LegendSymbol.js';
-import LineSeries from '../Series/LineSeries.js';
+import LineSeries from '../Series/Line/LineSeries.js';
 import Point from '../Core/Series/Point.js';
 import SVGRenderer from '../Core/Renderer/SVG/SVGRenderer.js';
 import U from '../Core/Utilities.js';
 var addEvent = U.addEvent, clamp = U.clamp, defined = U.defined, fireEvent = U.fireEvent, isNumber = U.isNumber, merge = U.merge, pick = U.pick, relativeLength = U.relativeLength;
 import '../Core/Options.js';
+/* *
+ *
+ *  Class
+ *
+ * */
 /**
  * Pie series type.
  *
@@ -629,11 +635,9 @@ BaseSeries.seriesType('pie', 'line',
         // Get the total sum
         for (i = 0; i < len; i++) {
             point = points[i];
-            total += (ignoreHiddenPoint && !point.visible) ?
-                0 :
-                point.isNull ?
-                    0 :
-                    point.y;
+            if (point.isValid() && (!ignoreHiddenPoint || point.visible)) {
+                total += point.y;
+            }
         }
         this.total = total;
         // Set each point's properties
@@ -705,7 +709,7 @@ BaseSeries.seriesType('pie', 'line',
             point = points[i];
             // set start and end angle
             start = startAngleRad + (cumulative * circ);
-            if (!ignoreHiddenPoint || point.visible) {
+            if (point.isValid() && (!ignoreHiddenPoint || point.visible)) {
                 cumulative += point.percentage / 100;
             }
             end = startAngleRad + (cumulative * circ);

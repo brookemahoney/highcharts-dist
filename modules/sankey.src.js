@@ -1,5 +1,5 @@
 /**
- * @license Highcharts JS v8.2.2 (2020-10-22)
+ * @license Highcharts JS v8.2.2 (2020-11-05)
  *
  * Sankey diagram module
  *
@@ -28,7 +28,7 @@
             obj[path] = fn.apply(null, args);
         }
     }
-    _registerModule(_modules, 'Mixins/Nodes.js', [_modules['Core/Globals.js'], _modules['Core/Series/Point.js'], _modules['Core/Utilities.js']], function (H, Point, U) {
+    _registerModule(_modules, 'Mixins/Nodes.js', [_modules['Core/Globals.js'], _modules['Series/Line/LineSeries.js'], _modules['Core/Series/Point.js'], _modules['Core/Utilities.js']], function (H, LineSeries, Point, U) {
         /* *
          *
          *  !!!!!!! SOURCE GETS TRANSPILED BY TYPESCRIPT. EDIT TS FILE ONLY. !!!!!!!
@@ -131,7 +131,7 @@
             generatePoints: function () {
                 var chart = this.chart,
                     nodeLookup = {};
-                H.Series.prototype.generatePoints.call(this);
+                LineSeries.prototype.generatePoints.call(this);
                 if (!this.nodes) {
                     this.nodes = []; // List of Point-like node items
                 }
@@ -179,14 +179,14 @@
                     });
                     this.nodes.length = 0;
                 }
-                H.Series.prototype.setData.apply(this, arguments);
+                LineSeries.prototype.setData.apply(this, arguments);
             },
             // Destroy alll nodes and links
             destroy: function () {
                 // Nodes must also be destroyed (#8682, #9300)
                 this.data = []
                     .concat(this.points || [], this.nodes);
-                return H.Series.prototype.destroy.apply(this, arguments);
+                return LineSeries.prototype.destroy.apply(this, arguments);
             },
             /**
              * When hovering node, highlight all connected links. When hovering a link,
@@ -447,7 +447,7 @@
 
         return result;
     });
-    _registerModule(_modules, 'Series/SankeySeries.js', [_modules['Core/Series/Series.js'], _modules['Core/Series/CartesianSeries.js'], _modules['Core/Color/Color.js'], _modules['Series/ColumnSeries.js'], _modules['Core/Globals.js'], _modules['Mixins/Nodes.js'], _modules['Core/Series/Point.js'], _modules['Mixins/TreeSeries.js'], _modules['Core/Utilities.js']], function (Series, CartesianSeries, Color, ColumnSeries, H, NodesMixin, Point, TreeSeriesMixin, U) {
+    _registerModule(_modules, 'Series/SankeySeries.js', [_modules['Core/Series/Series.js'], _modules['Core/Color/Color.js'], _modules['Series/Column/ColumnSeries.js'], _modules['Core/Globals.js'], _modules['Series/Line/LineSeries.js'], _modules['Mixins/Nodes.js'], _modules['Core/Series/Point.js'], _modules['Mixins/TreeSeries.js'], _modules['Core/Utilities.js']], function (BaseSeries, Color, ColumnSeries, H, LineSeries, NodesMixin, Point, TreeSeriesMixin, U) {
         /* *
          *
          *  Sankey diagram module
@@ -546,6 +546,11 @@
         * @type {Highcharts.SankeyNodeObject}
         */
         ''; // detach doclets above
+        /* *
+         *
+         *  Functions
+         *
+         * */
         // eslint-disable-next-line valid-jsdoc
         /**
          * @private
@@ -564,6 +569,11 @@
             optionsPoint);
             return options;
         };
+        /* *
+         *
+         *  Class
+         *
+         * */
         /**
          * @private
          * @class
@@ -571,7 +581,7 @@
          *
          * @augments Highcharts.Series
          */
-        Series.seriesType('sankey', 'column', 
+        BaseSeries.seriesType('sankey', 'column', 
         /**
          * A sankey diagram is a type of flow diagram, in which the width of the
          * link between two nodes is shown proportionally to the flow quantity.
@@ -1355,7 +1365,7 @@
                 this.points = points;
             },
             /* eslint-enable valid-jsdoc */
-            animate: CartesianSeries.prototype.animate
+            animate: LineSeries.prototype.animate
         }, {
             applyOptions: function (options, x) {
                 Point.prototype.applyOptions.call(this, options, x);

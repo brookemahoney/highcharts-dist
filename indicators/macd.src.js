@@ -1,5 +1,5 @@
 /**
- * @license Highstock JS v8.2.2 (2020-10-22)
+ * @license Highstock JS v8.2.2 (2020-11-05)
  *
  * Indicator series type for Highstock
  *
@@ -36,14 +36,15 @@
          *  !!!!!!! SOURCE GETS TRANSPILED BY TYPESCRIPT. EDIT TS FILE ONLY. !!!!!!!
          *
          * */
+        var seriesTypes = BaseSeries.seriesTypes;
         var noop = H.noop;
         var correctFloat = U.correctFloat,
             defined = U.defined,
             merge = U.merge;
         // im port './EMAIndicator.js';
         // im port './SMAIndicator.js';
-        var SMA = H.seriesTypes.sma,
-            EMA = H.seriesTypes.ema;
+        var SMA = seriesTypes.sma,
+            EMA = seriesTypes.ema;
         /**
          * The MACD series type.
          *

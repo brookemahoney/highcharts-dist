@@ -1,5 +1,5 @@
 /**
- * @license Highcharts JS v8.2.2 (2020-10-22)
+ * @license Highcharts JS v8.2.2 (2020-11-05)
  * @module highcharts/highcharts
  *
  * (c) 2009-2018 Torstein Honsi
@@ -26,7 +26,7 @@ import '../Core/Dynamics.js';
 import '../Series/AreaSeries.js';
 import '../Series/SplineSeries.js';
 import '../Series/AreaSplineSeries.js';
-import '../Series/ColumnSeries.js';
+import '../Series/Column/ColumnSeries.js';
 import '../Series/BarSeries.js';
 import '../Series/ScatterSeries.js';
 import '../Series/PieSeries.js';

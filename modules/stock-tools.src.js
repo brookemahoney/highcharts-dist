@@ -1,5 +1,5 @@
 /**
- * @license Highstock JS v8.2.2 (2020-10-22)
+ * @license Highstock JS v8.2.2 (2020-11-05)
  *
  * Advanced Highstock tools
  *
@@ -421,7 +421,7 @@
 
         return ControlPoint;
     });
-    _registerModule(_modules, 'Extensions/Annotations/MockPoint.js', [_modules['Core/Globals.js'], _modules['Core/Utilities.js'], _modules['Core/Axis/Axis.js']], function (H, U, Axis) {
+    _registerModule(_modules, 'Extensions/Annotations/MockPoint.js', [_modules['Series/Line/LineSeries.js'], _modules['Core/Utilities.js'], _modules['Core/Axis/Axis.js']], function (LineSeries, U, Axis) {
         /* *
          *
          *  !!!!!!! SOURCE GETS TRANSPILED BY TYPESCRIPT. EDIT TS FILE ONLY. !!!!!!!
@@ -518,7 +518,7 @@
                 this.series = {
                     visible: true,
                     chart: chart,
-                    getPlotBox: H.Series.prototype.getPlotBox
+                    getPlotBox: LineSeries.prototype.getPlotBox
                 };
                 /**
                  * @name Annotation.AnnotationMockPoint#target
@@ -4907,7 +4907,7 @@
 
         return NavigationBindings;
     });
-    _registerModule(_modules, 'Stock/StockToolsBindings.js', [_modules['Core/Globals.js'], _modules['Extensions/Annotations/NavigationBindings.js'], _modules['Core/Utilities.js']], function (H, NavigationBindings, U) {
+    _registerModule(_modules, 'Stock/StockToolsBindings.js', [_modules['Core/Globals.js'], _modules['Series/Line/LineSeries.js'], _modules['Extensions/Annotations/NavigationBindings.js'], _modules['Core/Utilities.js']], function (H, LineSeries, NavigationBindings, U) {
         /**
          *
          *  Events generator for Stock tools
@@ -5094,7 +5094,7 @@
                 // Make sure that indicator uses the SUM approx if SUM approx is used
                 // by parent series (#13950).
                 if (typeof parentSeries !== 'undefined' &&
-                    parentSeries instanceof Highcharts.Series &&
+                    parentSeries instanceof LineSeries &&
                     parentSeries.getDGApproximation() === 'sum' &&
                     // If indicator has defined approx type, use it (e.g. "ranges")
                     !defined(defaultOptions && defaultOptions[seriesConfig.type] && ((_a = defaultOptions.dataGrouping) === null || _a === void 0 ? void 0 : _a.approximation))) {

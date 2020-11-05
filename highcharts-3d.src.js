@@ -1,5 +1,5 @@
 /**
- * @license Highcharts JS v8.2.2 (2020-10-22)
+ * @license Highcharts JS v8.2.2 (2020-11-05)
  *
  * 3D features for Highcharts JS
  *
@@ -96,10 +96,10 @@
          * @private
          * @function Highcharts.perspective3D
          *
-         * @param {Highcharts.Position3dObject} coordinate
+         * @param {Highcharts.Position3DObject} coordinate
          * 3D position
          *
-         * @param {Highcharts.Position3dObject} origin
+         * @param {Highcharts.Position3DObject} origin
          * 3D root position
          *
          * @param {number} distance
@@ -110,24 +110,23 @@
          *
          * @requires highcharts-3d
          */
-        var perspective3D = H.perspective3D = function (coordinate,
-            origin,
-            distance) {
-                var projection = ((distance > 0) && (distance < Number.POSITIVE_INFINITY)) ?
+        function perspective3D(coordinate, origin, distance) {
+            var projection = ((distance > 0) && (distance < Number.POSITIVE_INFINITY)) ?
                     distance / (coordinate.z + origin.z + distance) :
                     1;
             return {
                 x: coordinate.x * projection,
                 y: coordinate.y * projection
             };
-        };
+        }
+        H.perspective3D = perspective3D;
         /**
          * Transforms a given array of points according to the angles in chart.options.
          *
          * @private
          * @function Highcharts.perspective
          *
-         * @param {Array<Highcharts.Position3dObject>} points
+         * @param {Array<Highcharts.Position3DObject>} points
          * The array of points
          *
          * @param {Highcharts.Chart} chart
@@ -139,32 +138,29 @@
          * @param {boolean} [useInvertedPersp]
          * Whether to use inverted perspective in calculations
          *
-         * @return {Array<Highcharts.Position3dObject>}
+         * @return {Array<Highcharts.Position3DObject>}
          * An array of transformed points
          *
          * @requires highcharts-3d
          */
-        var perspective = H.perspective = function (points,
-            chart,
-            insidePlotArea,
-            useInvertedPersp) {
-                var options3d = chart.options.chart.options3d, 
+        function perspective(points, chart, insidePlotArea, useInvertedPersp) {
+            var options3d = chart.options.chart.options3d, 
                 /* The useInvertedPersp argument is used for
                  * inverted charts with already inverted elements,
                  * such as dataLabels or tooltip positions.
                  */
                 inverted = pick(useInvertedPersp,
-            insidePlotArea ? chart.inverted : false),
-            origin = {
+                insidePlotArea ? chart.inverted : false),
+                origin = {
                     x: chart.plotWidth / 2,
                     y: chart.plotHeight / 2,
                     z: options3d.depth / 2,
                     vd: pick(options3d.depth, 1) * pick(options3d.viewDistance, 0)
                 },
-            scale = chart.scale3d || 1,
-            beta = deg2rad * options3d.beta * (inverted ? -1 : 1),
-            alpha = deg2rad * options3d.alpha * (inverted ? -1 : 1),
-            angles = {
+                scale = chart.scale3d || 1,
+                beta = deg2rad * options3d.beta * (inverted ? -1 : 1),
+                alpha = deg2rad * options3d.alpha * (inverted ? -1 : 1),
+                angles = {
                     cosA: Math.cos(alpha),
                     cosB: Math.cos(-beta),
                     sinA: Math.sin(alpha),
@@ -192,7 +188,8 @@
                     z: coordinate.z
                 };
             });
-        };
+        }
+        H.perspective = perspective;
         /**
          * Calculate a distance from camera to points - made for calculating zIndex of
          * scatter points.
@@ -211,10 +208,9 @@
          *
          * @requires highcharts-3d
          */
-        var pointCameraDistance = H.pointCameraDistance = function (coordinates,
-            chart) {
-                var options3d = chart.options.chart.options3d,
-            cameraPosition = {
+        function pointCameraDistance(coordinates, chart) {
+            var options3d = chart.options.chart.options3d,
+                cameraPosition = {
                     x: chart.plotWidth / 2,
                     y: chart.plotHeight / 2,
                     z: pick(options3d.depth, 1) * pick(options3d.viewDistance, 0) +
@@ -222,13 +218,14 @@
                 }, 
                 // Added support for objects with plotX or x coordinates.
                 distance = Math.sqrt(Math.pow(cameraPosition.x - pick(coordinates.plotX,
-            coordinates.x), 2) +
+                coordinates.x), 2) +
                     Math.pow(cameraPosition.y - pick(coordinates.plotY,
-            coordinates.y), 2) +
+                coordinates.y), 2) +
                     Math.pow(cameraPosition.z - pick(coordinates.plotZ,
-            coordinates.z), 2));
+                coordinates.z), 2));
             return distance;
-        };
+        }
+        H.pointCameraDistance = pointCameraDistance;
         /**
          * Calculate area of a 2D polygon using Shoelace algorithm
          * https://en.wikipedia.org/wiki/Shoelace_formula
@@ -244,23 +241,24 @@
          *
          * @requires highcharts-3d
          */
-        var shapeArea = H.shapeArea = function (vertexes) {
-                var area = 0,
-            i,
-            j;
+        function shapeArea(vertexes) {
+            var area = 0,
+                i,
+                j;
             for (i = 0; i < vertexes.length; i++) {
                 j = (i + 1) % vertexes.length;
                 area += vertexes[i].x * vertexes[j].y - vertexes[j].x * vertexes[i].y;
             }
             return area / 2;
-        };
+        }
+        H.shapeArea = shapeArea;
         /**
          * Calculate area of a 3D polygon after perspective projection
          *
          * @private
          * @function Highcharts.shapeArea3d
          *
-         * @param {Array<Highcharts.Position3dObject>} vertexes
+         * @param {Array<Highcharts.Position3DObject>} vertexes
          * 3D Polygon
          *
          * @param {Highcharts.Chart} chart
@@ -274,13 +272,10 @@
          *
          * @requires highcharts-3d
          */
-        var shapeArea3D = H.shapeArea3d = function (vertexes,
-            chart,
-            insidePlotArea) {
-                return shapeArea(perspective(vertexes,
-            chart,
-            insidePlotArea));
-        };
+        function shapeArea3D(vertexes, chart, insidePlotArea) {
+            return shapeArea(perspective(vertexes, chart, insidePlotArea));
+        }
+        H.shapeArea3d = shapeArea3D;
         var mathModule = {
                 perspective: perspective,
                 perspective3D: perspective3D,
@@ -1399,11 +1394,11 @@
              * @private
              * @param {Highcharts.Axis} axis
              * Related axis.
-             * @param {Highcharts.Position3dObject} pos
+             * @param {Highcharts.Position3DObject} pos
              * Position to fix.
              * @param {boolean} [isTitle]
              * Whether this is a title position.
-             * @return {Highcharts.Position3dObject}
+             * @return {Highcharts.Position3DObject}
              * Fixed position.
              */
             Axis3DAdditions.prototype.fix3dPosition = function (pos, isTitle) {
@@ -3923,7 +3918,7 @@
 
         return Chart3D;
     });
-    _registerModule(_modules, 'Core/Series/Series3D.js', [_modules['Core/Globals.js'], _modules['Extensions/Math3D.js'], _modules['Core/Utilities.js']], function (H, Math3D, U) {
+    _registerModule(_modules, 'Core/Series/Series3D.js', [_modules['Series/Line/LineSeries.js'], _modules['Extensions/Math3D.js'], _modules['Core/Utilities.js']], function (LineSeries, Math3D, U) {
         /* *
          *
          *  (c) 2010-2020 Torstein Honsi
@@ -3940,13 +3935,13 @@
             pick = U.pick;
         /* eslint-disable no-invalid-this */
         // Wrap the translate method to post-translate points into 3D perspective
-        addEvent(H.Series, 'afterTranslate', function () {
+        addEvent(LineSeries, 'afterTranslate', function () {
             if (this.chart.is3d()) {
                 this.translate3dPoints();
             }
         });
         // Translate the plotX, plotY properties and add plotZ.
-        H.Series.prototype.translate3dPoints = function () {
+        LineSeries.prototype.translate3dPoints = function () {
             var series = this,
                 chart = series.chart,
                 zAxis = pick(series.zAxis,
@@ -3992,7 +3987,7 @@
         };
 
     });
-    _registerModule(_modules, 'Series/Column3DSeries.js', [_modules['Core/Series/Series.js'], _modules['Core/Globals.js'], _modules['Extensions/Math3D.js'], _modules['Extensions/Stacking.js'], _modules['Core/Utilities.js']], function (BaseSeries, H, Math3D, StackItem, U) {
+    _registerModule(_modules, 'Series/Column3DSeries.js', [_modules['Core/Series/Series.js'], _modules['Series/Column/ColumnSeries.js'], _modules['Core/Globals.js'], _modules['Series/Line/LineSeries.js'], _modules['Extensions/Math3D.js'], _modules['Extensions/Stacking.js'], _modules['Core/Utilities.js']], function (BaseSeries, ColumnSeries, H, LineSeries, Math3D, StackItem, U) {
         /* *
          *
          *  (c) 2010-2020 Torstein Honsi
@@ -4002,13 +3997,12 @@
          *  !!!!!!! SOURCE GETS TRANSPILED BY TYPESCRIPT. EDIT TS FILE ONLY. !!!!!!!
          *
          * */
+        var columnProto = ColumnSeries.prototype;
+        var svg = H.svg;
         var perspective = Math3D.perspective;
         var addEvent = U.addEvent,
             pick = U.pick,
             wrap = U.wrap;
-        var Series = H.Series,
-            columnProto = BaseSeries.seriesTypes.column.prototype,
-            svg = H.svg;
         /**
          * Depth of the columns in a 3D column chart.
          *
@@ -4054,7 +4048,7 @@
          * Chart with stacks
          * @param {string} stacking
          * Stacking option
-         * @return {Highcharts.Stack3dDictionary}
+         * @return {Highcharts.Stack3DDictionary}
          */
         function retrieveStacks(chart, stacking) {
             var series = chart.series,
@@ -4082,7 +4076,7 @@
             }
         });
         // Don't use justifyDataLabel when point is outsidePlot
-        wrap(Series.prototype, 'justifyDataLabel', function (proceed) {
+        wrap(LineSeries.prototype, 'justifyDataLabel', function (proceed) {
             return !(arguments[2].outside3dPlot) ?
                 proceed.apply(this, [].slice.call(arguments, 1)) :
                 false;
@@ -4237,7 +4231,7 @@
         // In case of 3d columns there is no sense to add this columns to a specific
         // series group - if series is added to a group all columns will have the same
         // zIndex in comparison with different series.
-        wrap(columnProto, 'plotGroup', function (proceed, prop, name, visibility, zIndex, parent) {
+        wrap(columnProto, 'plotGroup', function (proceed, prop, _name, _visibility, _zIndex, parent) {
             if (prop !== 'dataLabelsGroup') {
                 if (this.chart.is3d()) {
                     if (this[prop]) {
@@ -4283,7 +4277,7 @@
             proceed.apply(this, Array.prototype.slice.call(arguments, 1));
         });
         columnProto.handle3dGrouping = true;
-        addEvent(Series, 'afterInit', function () {
+        addEvent(LineSeries, 'afterInit', function () {
             if (this.chart.is3d() &&
                 this.handle3dGrouping) {
                 var series = this,
@@ -4373,7 +4367,7 @@
             columnRangeProto.plotGroup = columnProto.plotGroup;
             columnRangeProto.setVisible = columnProto.setVisible;
         }
-        wrap(Series.prototype, 'alignDataLabel', function (proceed, point, dataLabel, options, alignTo) {
+        wrap(LineSeries.prototype, 'alignDataLabel', function (proceed, point, dataLabel, options, alignTo) {
             var chart = this.chart;
             // In 3D we need to pass point.outsidePlot option to the justifyDataLabel
             // method for disabling justifying dataLabels in columns outside plot
@@ -4452,61 +4446,6 @@
             }
             return stackBox;
         });
-        /*
-            @merge v6.2
-            @todo
-            EXTENSION FOR 3D CYLINDRICAL COLUMNS
-            Not supported
-        */
-        /*
-        var defaultOptions = H.getOptions();
-        defaultOptions.plotOptions.cylinder =
-            merge(defaultOptions.plotOptions.column);
-        var CylinderSeries = extendClass(seriesTypes.column, {
-                type: 'cylinder'
-            });
-        seriesTypes.cylinder = CylinderSeries;
-
-        wrap(seriesTypes.cylinder.prototype, 'translate', function (proceed) {
-            proceed.apply(this, [].slice.call(arguments, 1));
-
-            // Do not do this if the chart is not 3D
-            if (!this.chart.is3d()) {
-                return;
-            }
-
-            var series = this,
-                    chart = series.chart,
-                    options = chart.options,
-                    cylOptions = options.plotOptions.cylinder,
-                    options3d = options.chart.options3d,
-                    depth = cylOptions.depth || 0,
-                    alpha = chart.alpha3d;
-
-            var z = cylOptions.stacking ?
-                    (this.options.stack || 0) * depth :
-                    series._i * depth;
-            z += depth / 2;
-
-            if (cylOptions.grouping !== false) { z = 0; }
-
-            each(series.data, function (point) {
-                var shapeArgs = point.shapeArgs,
-                        deg2rad = H.deg2rad;
-                point.shapeType = 'arc3d';
-                shapeArgs.x += depth / 2;
-                shapeArgs.z = z;
-                shapeArgs.start = 0;
-                shapeArgs.end = 2 * PI;
-                shapeArgs.r = depth * 0.95;
-                shapeArgs.innerR = 0;
-                shapeArgs.depth =
-                    shapeArgs.height * (1 / sin((90 - alpha) * deg2rad)) - z;
-                shapeArgs.alpha = 90 - alpha;
-                shapeArgs.beta = 0;
-            });
-        });
-        */
 
     });
     _registerModule(_modules, 'Series/Pie3DSeries.js', [_modules['Core/Series/Series.js'], _modules['Core/Globals.js'], _modules['Core/Utilities.js']], function (BaseSeries, H, U) {
@@ -4521,11 +4460,11 @@
          *  !!!!!!! SOURCE GETS TRANSPILED BY TYPESCRIPT. EDIT TS FILE ONLY. !!!!!!!
          *
          * */
+        var seriesTypes = BaseSeries.seriesTypes;
         var deg2rad = H.deg2rad,
             svg = H.svg;
         var pick = U.pick,
             wrap = U.wrap;
-        var seriesTypes = BaseSeries.seriesTypes;
         /**
          * The thickness of a 3D pie.
          *

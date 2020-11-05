@@ -1,5 +1,5 @@
 /**
- * @license Highcharts JS v8.2.2 (2020-10-22)
+ * @license Highcharts JS v8.2.2 (2020-11-05)
  *
  * (c) 2017-2019 Highsoft AS
  * Authors: Jon Arild Nygard
@@ -721,6 +721,11 @@
             isObject = U.isObject,
             isString = U.isString,
             merge = U.merge;
+        /* *
+         *
+         *  Functions
+         *
+         * */
         var objectValues = function objectValues(obj) {
                 return Object.keys(obj).map(function (x) {
                     return obj[x];

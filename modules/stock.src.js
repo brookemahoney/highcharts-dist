@@ -1,5 +1,5 @@
 /**
- * @license Highstock JS v8.2.2 (2020-10-22)
+ * @license Highstock JS v8.2.2 (2020-11-05)
  *
  * Highstock as a plugin for Highcharts
  *
@@ -1253,7 +1253,7 @@
 
         return H.Scrollbar;
     });
-    _registerModule(_modules, 'Core/Navigator.js', [_modules['Core/Axis/Axis.js'], _modules['Core/Series/Series.js'], _modules['Core/Chart/Chart.js'], _modules['Core/Color/Color.js'], _modules['Core/Globals.js'], _modules['Series/LineSeries.js'], _modules['Core/Axis/NavigatorAxis.js'], _modules['Core/Options.js'], _modules['Core/Scrollbar.js'], _modules['Core/Utilities.js']], function (Axis, BaseSeries, Chart, Color, H, LineSeries, NavigatorAxis, O, Scrollbar, U) {
+    _registerModule(_modules, 'Core/Navigator.js', [_modules['Core/Axis/Axis.js'], _modules['Core/Series/Series.js'], _modules['Core/Chart/Chart.js'], _modules['Core/Color/Color.js'], _modules['Core/Globals.js'], _modules['Series/Line/LineSeries.js'], _modules['Core/Axis/NavigatorAxis.js'], _modules['Core/Options.js'], _modules['Core/Scrollbar.js'], _modules['Core/Utilities.js']], function (Axis, BaseSeries, Chart, Color, H, LineSeries, NavigatorAxis, O, Scrollbar, U) {
         /* *
          *
          *  (c) 2010-2020 Torstein Honsi
@@ -3322,7 +3322,7 @@
 
         return H.Navigator;
     });
-    _registerModule(_modules, 'Core/Axis/OrdinalAxis.js', [_modules['Core/Axis/Axis.js'], _modules['Core/Globals.js'], _modules['Core/Series/CartesianSeries.js'], _modules['Core/Utilities.js'], _modules['Core/Chart/Chart.js']], function (Axis, H, CartesianSeries, U, Chart) {
+    _registerModule(_modules, 'Core/Axis/OrdinalAxis.js', [_modules['Core/Axis/Axis.js'], _modules['Core/Globals.js'], _modules['Series/Line/LineSeries.js'], _modules['Core/Utilities.js'], _modules['Core/Chart/Chart.js']], function (Axis, H, LineSeries, U, Chart) {
         /* *
          *
          *  (c) 2010-2020 Torstein Honsi
@@ -3335,6 +3335,7 @@
         var addEvent = U.addEvent,
             css = U.css,
             defined = U.defined,
+            error = U.error,
             pick = U.pick,
             timeUnits = U.timeUnits;
         // Has a dependency on Navigator due to the use of Axis.toFixedRange
@@ -3568,7 +3569,7 @@
                                 xData: series.xData.slice(),
                                 chart: chart,
                                 destroyGroupedData: H.noop,
-                                getProcessedData: CartesianSeries.prototype.getProcessedData
+                                getProcessedData: LineSeries.prototype.getProcessedData
                             };
                             fakeSeries.xData = fakeSeries.xData.concat(ordinal.getOverscrollPositions());
                             fakeSeries.options = {
@@ -3810,29 +3811,34 @@
                     }
                     // Get the grouping info from the last of the segments. The info is
                     // the same for all segments.
-                    info = segmentPositions.info;
-                    // Optionally identify ticks with higher rank, for example when the
-                    // ticks have crossed midnight.
-                    if (findHigherRanks && info.unitRange <= timeUnits.hour) {
-                        end = groupPositions.length - 1;
-                        // Compare points two by two
-                        for (start = 1; start < end; start++) {
-                            if (time.dateFormat('%d', groupPositions[start]) !==
-                                time.dateFormat('%d', groupPositions[start - 1])) {
-                                higherRanks[groupPositions[start]] = 'day';
-                                hasCrossedHigherRank = true;
+                    if (segmentPositions) {
+                        info = segmentPositions.info;
+                        // Optionally identify ticks with higher rank, for example
+                        // when the ticks have crossed midnight.
+                        if (findHigherRanks && info.unitRange <= timeUnits.hour) {
+                            end = groupPositions.length - 1;
+                            // Compare points two by two
+                            for (start = 1; start < end; start++) {
+                                if (time.dateFormat('%d', groupPositions[start]) !==
+                                    time.dateFormat('%d', groupPositions[start - 1])) {
+                                    higherRanks[groupPositions[start]] = 'day';
+                                    hasCrossedHigherRank = true;
+                                }
                             }
+                            // If the complete array has crossed midnight, we want
+                            // to mark the first positions also as higher rank
+                            if (hasCrossedHigherRank) {
+                                higherRanks[groupPositions[0]] = 'day';
+                            }
+                            info.higherRanks = higherRanks;
                         }
-                        // If the complete array has crossed midnight, we want to mark
-                        // the first positions also as higher rank
-                        if (hasCrossedHigherRank) {
-                            higherRanks[groupPositions[0]] = 'day';
-                        }
-                        info.higherRanks = higherRanks;
+                        // Save the info
+                        info.segmentStarts = segmentStarts;
+                        groupPositions.info = info;
                     }
-                    // Save the info
-                    info.segmentStarts = segmentStarts;
-                    groupPositions.info = info;
+                    else {
+                        error(12, false, this.chart);
+                    }
                     // Don't show ticks within a gap in the ordinal axis, where the
                     // space between two points is greater than a portion of the tick
                     // pixel interval
@@ -4188,11 +4194,11 @@
             }
             OrdinalAxis.compose = compose;
         })(OrdinalAxis || (OrdinalAxis = {}));
-        OrdinalAxis.compose(Axis, Chart, CartesianSeries); // @todo move to StockChart, remove from master
+        OrdinalAxis.compose(Axis, Chart, LineSeries); // @todo move to StockChart, remove from master
 
         return OrdinalAxis;
     });
-    _registerModule(_modules, 'Core/Axis/BrokenAxis.js', [_modules['Core/Axis/Axis.js'], _modules['Series/LineSeries.js'], _modules['Extensions/Stacking.js'], _modules['Core/Utilities.js']], function (Axis, LineSeries, StackItem, U) {
+    _registerModule(_modules, 'Core/Axis/BrokenAxis.js', [_modules['Core/Axis/Axis.js'], _modules['Series/Line/LineSeries.js'], _modules['Extensions/Stacking.js'], _modules['Core/Utilities.js']], function (Axis, LineSeries, StackItem, U) {
         /* *
          *
          *  (c) 2009-2020 Torstein Honsi
@@ -4411,8 +4417,8 @@
                         }
                         Axis.prototype.setExtremes.call(this, newMin, newMax, redraw, animation, eventArguments);
                     };
-                    axis.setAxisTranslation = function (saveOld) {
-                        Axis.prototype.setAxisTranslation.call(this, saveOld);
+                    axis.setAxisTranslation = function () {
+                        Axis.prototype.setAxisTranslation.call(this);
                         brokenAxis.unitLength = null;
                         if (brokenAxis.hasBreaks) {
                             var breaks = axis.options.breaks || [], 
@@ -4775,7 +4781,7 @@
 
 
     });
-    _registerModule(_modules, 'Extensions/DataGrouping.js', [_modules['Core/Axis/Axis.js'], _modules['Core/Axis/DateTimeAxis.js'], _modules['Core/Globals.js'], _modules['Core/Options.js'], _modules['Core/Series/Point.js'], _modules['Core/Tooltip.js'], _modules['Core/Utilities.js']], function (Axis, DateTimeAxis, H, O, Point, Tooltip, U) {
+    _registerModule(_modules, 'Extensions/DataGrouping.js', [_modules['Core/Axis/Axis.js'], _modules['Core/Axis/DateTimeAxis.js'], _modules['Core/Globals.js'], _modules['Series/Line/LineSeries.js'], _modules['Core/Options.js'], _modules['Core/Series/Point.js'], _modules['Core/Tooltip.js'], _modules['Core/Utilities.js']], function (Axis, DateTimeAxis, H, LineSeries, O, Point, Tooltip, U) {
         /* *
          *
          *  (c) 2010-2020 Torstein Honsi
@@ -4785,6 +4791,18 @@
          *  !!!!!!! SOURCE GETS TRANSPILED BY TYPESCRIPT. EDIT TS FILE ONLY. !!!!!!!
          *
          * */
+        var seriesProto = LineSeries.prototype;
+        var addEvent = U.addEvent,
+            arrayMax = U.arrayMax,
+            arrayMin = U.arrayMin,
+            correctFloat = U.correctFloat,
+            defined = U.defined,
+            error = U.error,
+            extend = U.extend,
+            format = U.format,
+            isNumber = U.isNumber,
+            merge = U.merge,
+            pick = U.pick;
         /**
          * @typedef {"average"|"averages"|"open"|"high"|"low"|"close"|"sum"} Highcharts.DataGroupingApproximationValue
          */
@@ -4801,19 +4819,6 @@
         * @type {number}
         */
         ''; // detach doclets above
-        var defaultOptions = O.defaultOptions;
-        var addEvent = U.addEvent,
-            arrayMax = U.arrayMax,
-            arrayMin = U.arrayMin,
-            correctFloat = U.correctFloat,
-            defined = U.defined,
-            error = U.error,
-            extend = U.extend,
-            format = U.format,
-            isNumber = U.isNumber,
-            merge = U.merge,
-            pick = U.pick;
-        var Series = H.Series;
         /* ************************************************************************** *
          *  Start data grouping module                                                *
          * ************************************************************************** */
@@ -5066,7 +5071,7 @@
             };
         // -----------------------------------------------------------------------------
         // The following code applies to implementation of data grouping on a Series
-        var seriesProto = Series.prototype, baseProcessData = seriesProto.processData, baseGeneratePoints = seriesProto.generatePoints, 
+        var baseProcessData = seriesProto.processData, baseGeneratePoints = seriesProto.generatePoints, 
             /** @ignore */
             commonOptions = {
                 // enabled: null, // (true for stock charts, false for basic),
@@ -5441,10 +5446,10 @@
             }
         });
         // Destroy grouped data on series destroy
-        addEvent(Series, 'destroy', seriesProto.destroyGroupedData);
+        addEvent(LineSeries, 'destroy', seriesProto.destroyGroupedData);
         // Handle default options for data grouping. This must be set at runtime because
         // some series types are defined after this.
-        addEvent(Series, 'afterSetOptions', function (e) {
+        addEvent(LineSeries, 'afterSetOptions', function (e) {
             var options = e.options,
                 type = this.type,
                 plotOptions = this.chart.options.plotOptions,
@@ -5763,7 +5768,7 @@
 
         return dataGrouping;
     });
-    _registerModule(_modules, 'Series/OHLCSeries.js', [_modules['Core/Series/Series.js'], _modules['Core/Series/Point.js']], function (BaseSeries, Point) {
+    _registerModule(_modules, 'Series/OHLCSeries.js', [_modules['Core/Series/Series.js'], _modules['Series/Column/ColumnSeries.js'], _modules['Core/Series/Point.js']], function (BaseSeries, ColumnSeries, Point) {
         /* *
          *
          *  (c) 2010-2020 Torstein Honsi
@@ -5773,7 +5778,12 @@
          *  !!!!!!! SOURCE GETS TRANSPILED BY TYPESCRIPT. EDIT TS FILE ONLY. !!!!!!!
          *
          * */
-        var seriesTypes = BaseSeries.seriesTypes;
+        var columnProto = ColumnSeries.prototype;
+        /* *
+         *
+         *  Class
+         *
+         * */
         /**
          * The ohlc series type.
          *
@@ -5899,7 +5909,7 @@
              * @return {void}
              */
             init: function () {
-                seriesTypes.column.prototype.init.apply(this, arguments);
+                columnProto.init.apply(this, arguments);
                 this.options.stacking = void 0; // #8817
             },
             /**
@@ -5912,7 +5922,7 @@
              * @return {Highcharts.SVGAttributes}
              */
             pointAttribs: function (point, state) {
-                var attribs = seriesTypes.column.prototype.pointAttribs.call(this,
+                var attribs = columnProto.pointAttribs.call(this,
                     point,
                     state),
                     options = this.options;
@@ -5942,7 +5952,7 @@
                         'plotClose',
                         'yBottom'
                     ]; // translate OHLC for
-                    seriesTypes.column.prototype.translate.apply(series);
+                    columnProto.translate.apply(series);
                 // Do the translation
                 series.points.forEach(function (point) {
                     [point.open, point.high, point.low, point.close, point.low]
@@ -6134,7 +6144,7 @@
         ''; // adds doclets above to transpilat
 
     });
-    _registerModule(_modules, 'Series/CandlestickSeries.js', [_modules['Core/Series/Series.js'], _modules['Core/Options.js'], _modules['Core/Utilities.js']], function (BaseSeries, O, U) {
+    _registerModule(_modules, 'Series/CandlestickSeries.js', [_modules['Core/Series/Series.js'], _modules['Series/Column/ColumnSeries.js'], _modules['Core/Options.js'], _modules['Core/Utilities.js']], function (BaseSeries, ColumnSeries, O, U) {
         /* *
          *
          *  (c) 2010-2020 Torstein Honsi
@@ -6144,9 +6154,14 @@
          *  !!!!!!! SOURCE GETS TRANSPILED BY TYPESCRIPT. EDIT TS FILE ONLY. !!!!!!!
          *
          * */
+        var columnProto = ColumnSeries.prototype;
         var defaultOptions = O.defaultOptions;
         var merge = U.merge;
-        var columnProto = BaseSeries.seriesTypes.column.prototype;
+        /* *
+         *
+         *  Code
+         *
+         * */
         /**
          * A candlestick chart is a style of financial chart used to describe price
          * movements over time.
@@ -6271,9 +6286,6 @@
              *
              * @private
              * @function Highcharts.seriesTypes.candlestick#pointAttribs
-             * @param {Highcharts.Point} point
-             * @param {string} [state]
-             * @return {Highcharts.SVGAttributes}
              */
             pointAttribs: function (point, state) {
                 var attribs = columnProto.pointAttribs.call(this,
@@ -6449,7 +6461,7 @@
         ''; // adds doclets above to transpilat
 
     });
-    _registerModule(_modules, 'Mixins/OnSeries.js', [_modules['Core/Globals.js'], _modules['Core/Utilities.js']], function (H, U) {
+    _registerModule(_modules, 'Mixins/OnSeries.js', [_modules['Series/Column/ColumnSeries.js'], _modules['Series/Line/LineSeries.js'], _modules['Core/Utilities.js']], function (ColumnSeries, LineSeries, U) {
         /* *
          *
          *  (c) 2010-2020 Torstein Honsi
@@ -6459,9 +6471,10 @@
          *  !!!!!!! SOURCE GETS TRANSPILED BY TYPESCRIPT. EDIT TS FILE ONLY. !!!!!!!
          *
          * */
+        var columnProto = ColumnSeries.prototype;
+        var seriesProto = LineSeries.prototype;
         var defined = U.defined,
             stableSort = U.stableSort;
-        var seriesTypes = H.seriesTypes;
         /**
          * @private
          * @mixin onSeriesMixin
@@ -6479,7 +6492,7 @@
                  * @return {Highcharts.SeriesPlotBoxObject}
                  */
                 getPlotBox: function () {
-                    return H.Series.prototype.getPlotBox.call((this.options.onSeries &&
+                    return seriesProto.getPlotBox.call((this.options.onSeries &&
                         this.chart.get(this.options.onSeries)) || this);
             },
             /**
@@ -6490,7 +6503,7 @@
              * @return {void}
              */
             translate: function () {
-                seriesTypes.column.prototype.translate.apply(this);
+                columnProto.translate.apply(this);
                 var series = this,
                     options = series.options,
                     chart = series.chart,
@@ -6607,7 +6620,7 @@
 
         return onSeriesMixin;
     });
-    _registerModule(_modules, 'Series/FlagsSeries.js', [_modules['Core/Series/Series.js'], _modules['Core/Globals.js'], _modules['Mixins/OnSeries.js'], _modules['Core/Renderer/SVG/SVGElement.js'], _modules['Core/Renderer/SVG/SVGRenderer.js'], _modules['Core/Utilities.js']], function (BaseSeries, H, OnSeriesMixin, SVGElement, SVGRenderer, U) {
+    _registerModule(_modules, 'Series/FlagsSeries.js', [_modules['Core/Series/Series.js'], _modules['Core/Globals.js'], _modules['Series/Line/LineSeries.js'], _modules['Mixins/OnSeries.js'], _modules['Core/Renderer/SVG/SVGElement.js'], _modules['Core/Renderer/SVG/SVGRenderer.js'], _modules['Core/Utilities.js']], function (BaseSeries, H, LineSeries, OnSeriesMixin, SVGElement, SVGRenderer, U) {
         /* *
          *
          *  (c) 2010-2020 Torstein Honsi
@@ -6625,7 +6638,6 @@
             objectEach = U.objectEach,
             wrap = U.wrap;
         var Renderer = H.Renderer,
-            Series = H.Series,
             TrackerMixin = H.TrackerMixin, // Interaction
             VMLRenderer = H.VMLRenderer,
             symbols = SVGRenderer.prototype.symbols;
@@ -6869,7 +6881,7 @@
              * @private
              * @borrows Highcharts.Series#init as Highcharts.seriesTypes.flags#init
              */
-            init: Series.prototype.init,
+            init: LineSeries.prototype.init,
             /**
              * Get presentational attributes
              *
@@ -7123,7 +7135,7 @@
              * @return {void}
              */
             setClip: function () {
-                Series.prototype.setClip.apply(this, arguments);
+                LineSeries.prototype.setClip.apply(this, arguments);
                 if (this.options.clip !== false && this.sharedClipKey) {
                     this.markerGroup
                         .clip(this.chart[this.sharedClipKey]);
@@ -9081,7 +9093,7 @@
 
         return H.RangeSelector;
     });
-    _registerModule(_modules, 'Core/Chart/StockChart.js', [_modules['Core/Axis/Axis.js'], _modules['Core/Chart/Chart.js'], _modules['Core/Globals.js'], _modules['Series/LineSeries.js'], _modules['Core/Series/Point.js'], _modules['Core/Renderer/SVG/SVGRenderer.js'], _modules['Core/Utilities.js']], function (Axis, Chart, H, LineSeries, Point, SVGRenderer, U) {
+    _registerModule(_modules, 'Core/Chart/StockChart.js', [_modules['Core/Axis/Axis.js'], _modules['Core/Chart/Chart.js'], _modules['Core/Globals.js'], _modules['Series/Line/LineSeries.js'], _modules['Core/Series/Point.js'], _modules['Core/Renderer/SVG/SVGRenderer.js'], _modules['Core/Utilities.js']], function (Axis, Chart, H, LineSeries, Point, SVGRenderer, U) {
         /* *
          *
          *  (c) 2010-2020 Torstein Honsi

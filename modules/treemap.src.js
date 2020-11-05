@@ -1,5 +1,5 @@
 /**
- * @license Highcharts JS v8.2.2 (2020-10-22)
+ * @license Highcharts JS v8.2.2 (2020-11-05)
  *
  * (c) 2014-2019 Highsoft AS
  * Authors: Jon Arild Nygard / Oystein Moseng
@@ -425,7 +425,7 @@
 
         return result;
     });
-    _registerModule(_modules, 'Series/TreemapSeries.js', [_modules['Core/Series/Series.js'], _modules['Core/Color/Color.js'], _modules['Mixins/ColorMapSeries.js'], _modules['Mixins/DrawPoint.js'], _modules['Core/Globals.js'], _modules['Mixins/LegendSymbol.js'], _modules['Core/Series/Point.js'], _modules['Mixins/TreeSeries.js'], _modules['Core/Utilities.js']], function (BaseSeries, Color, ColorMapMixin, DrawPointMixin, H, LegendSymbolMixin, Point, TreeSeriesMixin, U) {
+    _registerModule(_modules, 'Series/TreemapSeries.js', [_modules['Core/Series/Series.js'], _modules['Core/Color/Color.js'], _modules['Mixins/ColorMapSeries.js'], _modules['Mixins/DrawPoint.js'], _modules['Core/Globals.js'], _modules['Mixins/LegendSymbol.js'], _modules['Series/Line/LineSeries.js'], _modules['Core/Series/Point.js'], _modules['Mixins/TreeSeries.js'], _modules['Core/Utilities.js']], function (BaseSeries, Color, ColorMapMixin, DrawPointMixin, H, LegendSymbolMixin, LineSeries, Point, TreeSeriesMixin, U) {
         /* *
          *
          *  (c) 2014-2020 Highsoft AS
@@ -464,7 +464,7 @@
         // @todo Similar to eachObject, this function is likely redundant
         var isBoolean = function (x) {
                 return typeof x === 'boolean';
-        }, Series = H.Series, 
+        }, 
         // @todo Similar to recursive, this function is likely redundant
         eachObject = function (list, func, context) {
             context = context || this;
@@ -1040,7 +1040,7 @@
                         delete options.drillUpButton;
                     }
                 });
-                Series.prototype.init.call(series, chart, options);
+                LineSeries.prototype.init.call(series, chart, options);
                 // Treemap's opacity is a different option from other series
                 delete series.opacity;
                 // Handle deprecated options.
@@ -1474,7 +1474,7 @@
                     tree,
                     val;
                 // Call prototype function
-                Series.prototype.translate.call(series);
+                LineSeries.prototype.translate.call(series);
                 // @todo Only if series.isDirtyData is true
                 tree = series.tree = series.getTree();
                 rootNode = series.nodeMap[rootId];
@@ -1592,7 +1592,7 @@
                     // Merge custom options with point options
                     point.dlOptions = merge(options, point.options.dataLabels);
                 });
-                Series.prototype.drawDataLabels.call(this);
+                LineSeries.prototype.drawDataLabels.call(this);
             },
             // Over the alignment method by setting z index
             alignDataLabel: function (point, dataLabel, labelOptions) {
@@ -1919,7 +1919,7 @@
             drawLegendSymbol: LegendSymbolMixin.drawRectangle,
             getExtremes: function () {
                 // Get the extremes from the value data
-                var _a = Series.prototype.getExtremes
+                var _a = LineSeries.prototype.getExtremes
                         .call(this,
                     this.colorValueData),
                     dataMin = _a.dataMin,
@@ -1927,7 +1927,7 @@
                 this.valueMin = dataMin;
                 this.valueMax = dataMax;
                 // Get the extremes from the y data
-                return Series.prototype.getExtremes.call(this);
+                return LineSeries.prototype.getExtremes.call(this);
             },
             getExtremesFromAll: true,
             /**
@@ -1939,7 +1939,7 @@
              */
             setState: function (state) {
                 this.options.inactiveOtherPoints = true;
-                Series.prototype.setState.call(this, state, false);
+                LineSeries.prototype.setState.call(this, state, false);
                 this.options.inactiveOtherPoints = false;
             },
             utils: {
@@ -1990,7 +1990,7 @@
                 return isNumber(this.plotY) && this.y !== null;
             }
         });
-        addEvent(H.Series, 'afterBindAxes', function () {
+        addEvent(LineSeries, 'afterBindAxes', function () {
             var series = this,
                 xAxis = series.xAxis,
                 yAxis = series.yAxis,

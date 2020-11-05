@@ -1,5 +1,5 @@
 /**
- * @license Highcharts JS v8.2.2 (2020-10-22)
+ * @license Highcharts JS v8.2.2 (2020-11-05)
  *
  * Accessibility module
  *
@@ -2059,7 +2059,7 @@
 
         return MenuComponent;
     });
-    _registerModule(_modules, 'Accessibility/Components/SeriesComponent/SeriesKeyboardNavigation.js', [_modules['Core/Series/Series.js'], _modules['Core/Series/CartesianSeries.js'], _modules['Core/Chart/Chart.js'], _modules['Core/Series/Point.js'], _modules['Core/Utilities.js'], _modules['Accessibility/KeyboardNavigationHandler.js'], _modules['Accessibility/Utils/EventProvider.js'], _modules['Accessibility/Utils/ChartUtilities.js']], function (Series, CartesianSeries, Chart, Point, U, KeyboardNavigationHandler, EventProvider, ChartUtilities) {
+    _registerModule(_modules, 'Accessibility/Components/SeriesComponent/SeriesKeyboardNavigation.js', [_modules['Core/Series/Series.js'], _modules['Core/Chart/Chart.js'], _modules['Series/Line/LineSeries.js'], _modules['Core/Series/Point.js'], _modules['Core/Utilities.js'], _modules['Accessibility/KeyboardNavigationHandler.js'], _modules['Accessibility/Utils/EventProvider.js'], _modules['Accessibility/Utils/ChartUtilities.js']], function (Series, Chart, LineSeries, Point, U, KeyboardNavigationHandler, EventProvider, ChartUtilities) {
         /* *
          *
          *  (c) 2009-2020 Øystein Moseng
@@ -2082,7 +2082,7 @@
          * Set for which series types it makes sense to move to the closest point with
          * up/down arrows, and which series types should just move to next series.
          */
-        CartesianSeries.prototype.keyboardMoveVertical = true;
+        LineSeries.prototype.keyboardMoveVertical = true;
         ['column', 'pie'].forEach(function (type) {
             if (seriesTypes[type]) {
                 seriesTypes[type].prototype.keyboardMoveVertical = false;
@@ -2308,7 +2308,7 @@
          *
          * @return {boolean|Highcharts.Point}
          */
-        CartesianSeries.prototype.highlightFirstValidPoint = function () {
+        LineSeries.prototype.highlightFirstValidPoint = function () {
             var curPoint = this.chart.highlightedPoint,
                 start = (curPoint && curPoint.series) === this ?
                     getPointIndex(curPoint) :
@@ -2491,7 +2491,7 @@
                 var keyboardNavigation = this,
                     chart = this.chart,
                     e = this.eventProvider = new EventProvider();
-                e.addEvent(CartesianSeries, 'destroy', function () {
+                e.addEvent(LineSeries, 'destroy', function () {
                     return keyboardNavigation.onSeriesDestroy(this);
                 });
                 e.addEvent(chart, 'afterDrilldown', function () {
@@ -3321,7 +3321,7 @@
 
         return Announcer;
     });
-    _registerModule(_modules, 'Accessibility/Components/SeriesComponent/NewDataAnnouncer.js', [_modules['Core/Globals.js'], _modules['Core/Series/CartesianSeries.js'], _modules['Core/Utilities.js'], _modules['Accessibility/Utils/ChartUtilities.js'], _modules['Accessibility/Components/SeriesComponent/SeriesDescriber.js'], _modules['Accessibility/Utils/Announcer.js'], _modules['Accessibility/Utils/EventProvider.js']], function (H, CartesianSeries, U, ChartUtilities, SeriesDescriber, Announcer, EventProvider) {
+    _registerModule(_modules, 'Accessibility/Components/SeriesComponent/NewDataAnnouncer.js', [_modules['Core/Globals.js'], _modules['Series/Line/LineSeries.js'], _modules['Core/Utilities.js'], _modules['Accessibility/Utils/ChartUtilities.js'], _modules['Accessibility/Components/SeriesComponent/SeriesDescriber.js'], _modules['Accessibility/Utils/Announcer.js'], _modules['Accessibility/Utils/EventProvider.js']], function (H, LineSeries, U, ChartUtilities, SeriesDescriber, Announcer, EventProvider) {
         /* *
          *
          *  (c) 2009-2020 Øystein Moseng
@@ -3414,13 +3414,13 @@
                 e.addEvent(chart, 'afterDrilldown', function () {
                     announcer.lastAnnouncementTime = 0;
                 });
-                e.addEvent(CartesianSeries, 'updatedData', function () {
+                e.addEvent(LineSeries, 'updatedData', function () {
                     announcer.onSeriesUpdatedData(this);
                 });
                 e.addEvent(chart, 'afterAddSeries', function (e) {
                     announcer.onSeriesAdded(e.series);
                 });
-                e.addEvent(CartesianSeries, 'addPoint', function (e) {
+                e.addEvent(LineSeries, 'addPoint', function (e) {
                     announcer.onPointAdded(e.point);
                 });
                 e.addEvent(chart, 'redraw', function () {
@@ -3584,7 +3584,7 @@
 
         return NewDataAnnouncer;
     });
-    _registerModule(_modules, 'Accessibility/Components/SeriesComponent/ForcedMarkers.js', [_modules['Core/Series/CartesianSeries.js'], _modules['Core/Utilities.js']], function (CartesianSeries, U) {
+    _registerModule(_modules, 'Accessibility/Components/SeriesComponent/ForcedMarkers.js', [_modules['Series/Line/LineSeries.js'], _modules['Core/Utilities.js']], function (LineSeries, U) {
         /* *
          *
          *  (c) 2009-2020 Øystein Moseng
@@ -3708,7 +3708,7 @@
              * Keep track of forcing markers.
              * @private
              */
-            addEvent(CartesianSeries, 'render', function () {
+            addEvent(LineSeries, 'render', function () {
                 var series = this,
                     options = series.options;
                 if (shouldForceMarkers(series)) {
@@ -3729,14 +3729,14 @@
              * Keep track of options to reset markers to if no longer forced.
              * @private
              */
-            addEvent(CartesianSeries, 'afterSetOptions', function (e) {
+            addEvent(LineSeries, 'afterSetOptions', function (e) {
                 this.resetA11yMarkerOptions = merge(e.options.marker || {}, this.userOptions.marker || {});
             });
             /**
              * Process marker graphics after render
              * @private
              */
-            addEvent(CartesianSeries, 'afterRender', function () {
+            addEvent(LineSeries, 'afterRender', function () {
                 var series = this;
                 // For styled mode the rendered graphic does not reflect the style
                 // options, and we need to add/remove classes to achieve the same.
@@ -5184,9 +5184,9 @@
          *  !!!!!!! SOURCE GETS TRANSPILED BY TYPESCRIPT. EDIT TS FILE ONLY. !!!!!!!
          *
          * */
-        var isMS = H.isMS,
-            win = H.win,
-            doc = win.document;
+        var doc = H.doc,
+            isMS = H.isMS,
+            win = H.win;
         var whcm = {
                 /**
                  * Detect WHCM in the browser.
@@ -7366,7 +7366,7 @@
         };
 
     });
-    _registerModule(_modules, 'Accessibility/Accessibility.js', [_modules['Accessibility/Utils/ChartUtilities.js'], _modules['Core/Globals.js'], _modules['Accessibility/KeyboardNavigationHandler.js'], _modules['Core/Series/CartesianSeries.js'], _modules['Core/Options.js'], _modules['Core/Series/Point.js'], _modules['Core/Utilities.js'], _modules['Accessibility/AccessibilityComponent.js'], _modules['Accessibility/KeyboardNavigation.js'], _modules['Accessibility/Components/LegendComponent.js'], _modules['Accessibility/Components/MenuComponent.js'], _modules['Accessibility/Components/SeriesComponent/SeriesComponent.js'], _modules['Accessibility/Components/ZoomComponent.js'], _modules['Accessibility/Components/RangeSelectorComponent.js'], _modules['Accessibility/Components/InfoRegionsComponent.js'], _modules['Accessibility/Components/ContainerComponent.js'], _modules['Accessibility/HighContrastMode.js'], _modules['Accessibility/HighContrastTheme.js'], _modules['Accessibility/Options/Options.js'], _modules['Accessibility/Options/LangOptions.js'], _modules['Accessibility/Options/DeprecatedOptions.js']], function (ChartUtilities, H, KeyboardNavigationHandler, CartesianSeries, O, Point, U, AccessibilityComponent, KeyboardNavigation, LegendComponent, MenuComponent, SeriesComponent, ZoomComponent, RangeSelectorComponent, InfoRegionsComponent, ContainerComponent, whcm, highContrastTheme, defaultOptionsA11Y, defaultLangOptions, copyDeprecatedOptions) {
+    _registerModule(_modules, 'Accessibility/Accessibility.js', [_modules['Accessibility/Utils/ChartUtilities.js'], _modules['Core/Globals.js'], _modules['Accessibility/KeyboardNavigationHandler.js'], _modules['Series/Line/LineSeries.js'], _modules['Core/Options.js'], _modules['Core/Series/Point.js'], _modules['Core/Utilities.js'], _modules['Accessibility/AccessibilityComponent.js'], _modules['Accessibility/KeyboardNavigation.js'], _modules['Accessibility/Components/LegendComponent.js'], _modules['Accessibility/Components/MenuComponent.js'], _modules['Accessibility/Components/SeriesComponent/SeriesComponent.js'], _modules['Accessibility/Components/ZoomComponent.js'], _modules['Accessibility/Components/RangeSelectorComponent.js'], _modules['Accessibility/Components/InfoRegionsComponent.js'], _modules['Accessibility/Components/ContainerComponent.js'], _modules['Accessibility/HighContrastMode.js'], _modules['Accessibility/HighContrastTheme.js'], _modules['Accessibility/Options/Options.js'], _modules['Accessibility/Options/LangOptions.js'], _modules['Accessibility/Options/DeprecatedOptions.js']], function (ChartUtilities, H, KeyboardNavigationHandler, LineSeries, O, Point, U, AccessibilityComponent, KeyboardNavigation, LegendComponent, MenuComponent, SeriesComponent, ZoomComponent, RangeSelectorComponent, InfoRegionsComponent, ContainerComponent, whcm, highContrastTheme, defaultOptionsA11Y, defaultLangOptions, copyDeprecatedOptions) {
         /* *
          *
          *  (c) 2009-2020 Øystein Moseng
@@ -7611,7 +7611,7 @@
             });
         });
         ['update', 'updatedData', 'remove'].forEach(function (event) {
-            addEvent(CartesianSeries, event, function () {
+            addEvent(LineSeries, event, function () {
                 if (this.chart.accessibility) {
                     this.chart.a11yDirty = true;
                 }

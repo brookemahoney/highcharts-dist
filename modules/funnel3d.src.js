@@ -1,5 +1,5 @@
 /**
- * @license Highcharts JS v8.2.2 (2020-10-22)
+ * @license Highcharts JS v8.2.2 (2020-11-05)
  *
  * Highcharts funnel module
  *
@@ -28,7 +28,7 @@
             obj[path] = fn.apply(null, args);
         }
     }
-    _registerModule(_modules, 'Series/Funnel3DSeries.js', [_modules['Core/Color/Color.js'], _modules['Core/Globals.js'], _modules['Extensions/Math3D.js'], _modules['Core/Series/Series.js'], _modules['Core/Utilities.js']], function (Color, H, Math3D, Series, U) {
+    _registerModule(_modules, 'Series/Funnel3DSeries.js', [_modules['Core/Series/Series.js'], _modules['Core/Color/Color.js'], _modules['Series/Column/ColumnSeries.js'], _modules['Core/Globals.js'], _modules['Series/Line/LineSeries.js'], _modules['Extensions/Math3D.js'], _modules['Core/Utilities.js']], function (BaseSeries, Color, ColumnSeries, H, LineSeries, Math3D, U) {
         /* *
          *
          *  Highcharts funnel3d series module
@@ -43,10 +43,10 @@
          *
          * */
         var color = Color.parse;
+        var columnProto = ColumnSeries.prototype;
         var charts = H.charts,
             RendererProto = H.Renderer.prototype;
         var perspective = Math3D.perspective;
-        var seriesTypes = Series.seriesTypes;
         var error = U.error,
             extend = U.extend,
             merge = U.merge,
@@ -54,6 +54,11 @@
             relativeLength = U.relativeLength;
         var cuboidPath = RendererProto.cuboidPath,
             funnel3dMethods;
+        /* *
+         *
+         *  Class
+         *
+         * */
         /**
          * The funnel3d series type.
          *
@@ -63,7 +68,7 @@
          * @requires modules/cylinder
          * @requires modules/funnel3d
          */
-        Series.seriesType('funnel3d', 'column', 
+        BaseSeries.seriesType('funnel3d', 'column', 
         /**
          * A funnel3d is a 3d version of funnel series type. Funnel charts are
          * a type of chart often used to visualize stages in a sales project,
@@ -154,7 +159,7 @@
         }, {
             // Override default axis options with series required options for axes
             bindAxes: function () {
-                H.Series.prototype.bindAxes.apply(this, arguments);
+                LineSeries.prototype.bindAxes.apply(this, arguments);
                 extend(this.xAxis.options, {
                     gridLineWidth: 0,
                     lineWidth: 0,
@@ -171,7 +176,7 @@
             },
             translate3dShapes: H.noop,
             translate: function () {
-                H.Series.prototype.translate.apply(this, arguments);
+                LineSeries.prototype.translate.apply(this, arguments);
                 var sum = 0,
                     series = this,
                     chart = series.chart,
@@ -366,14 +371,11 @@
                     }
                 }
                 point.dlBox = dlBox;
-                seriesTypes.column.prototype.alignDataLabel.apply(series, arguments);
+                columnProto.alignDataLabel.apply(series, arguments);
             }
         }, /** @lends seriesTypes.funnel3d.prototype.pointClass.prototype */ {
             shapeType: 'funnel3d',
-            hasNewShapeType: H
-                .seriesTypes.column.prototype
-                .pointClass.prototype
-                .hasNewShapeType
+            hasNewShapeType: columnProto.pointClass.prototype.hasNewShapeType
         });
         /**
          * A `funnel3d` series. If the [type](#series.funnel3d.type) option is

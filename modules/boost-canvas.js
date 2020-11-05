@@ -1,5 +1,5 @@
 /*
- Highcharts JS v8.2.2 (2020-10-22)
+ Highcharts JS v8.2.2 (2020-11-05)
 
  Boost module
 
@@ -8,7 +8,7 @@
 
  License: www.highcharts.com/license
 */
-(function(f){"object"===typeof module&&module.exports?(f["default"]=f,module.exports=f):"function"===typeof define&&define.amd?define("highcharts/modules/boost-canvas",["highcharts"],function(m){f(m);f.Highcharts=m;return f}):f("undefined"!==typeof Highcharts?Highcharts:void 0)})(function(f){function m(f,m,q,v){f.hasOwnProperty(m)||(f[m]=v.apply(null,q))}f=f?f._modules:{};m(f,"Extensions/BoostCanvas.js",[f["Core/Chart/Chart.js"],f["Core/Color/Color.js"],f["Core/Globals.js"],f["Series/LineSeries.js"],
+(function(f){"object"===typeof module&&module.exports?(f["default"]=f,module.exports=f):"function"===typeof define&&define.amd?define("highcharts/modules/boost-canvas",["highcharts"],function(m){f(m);f.Highcharts=m;return f}):f("undefined"!==typeof Highcharts?Highcharts:void 0)})(function(f){function m(f,m,q,v){f.hasOwnProperty(m)||(f[m]=v.apply(null,q))}f=f?f._modules:{};m(f,"Extensions/BoostCanvas.js",[f["Core/Chart/Chart.js"],f["Core/Color/Color.js"],f["Core/Globals.js"],f["Series/Line/LineSeries.js"],
 f["Core/Series/Series.js"],f["Core/Utilities.js"]],function(f,m,q,v,A,r){var ca=m.parse,B=q.doc,da=q.noop,C=r.addEvent,x=r.extend,ea=r.fireEvent,fa=r.isNumber,ha=r.merge,ia=r.pick,y=r.wrap,k=A.seriesTypes,M;return function(){q.seriesTypes.heatmap&&y(q.seriesTypes.heatmap.prototype,"drawPoints",function(){var a=this.chart,b=this.getContext(),e=this.chart.inverted,f=this.xAxis,c=this.yAxis;b?(this.points.forEach(function(d){var g=d.plotY;"undefined"===typeof g||isNaN(g)||null===d.y||(g=d.shapeArgs,
 d=a.styledMode?d.series.colorAttribs(d):d.series.pointAttribs(d),b.fillStyle=d.fill,e?b.fillRect(c.len-g.y+f.left,f.len-g.x+c.top,-g.height,-g.width):b.fillRect(g.x+f.left,g.y+c.top,g.width,g.height))}),this.canvasToSVG()):this.chart.showLoading("Your browser doesn't support HTML5 canvas, <br>please use a modern browser")});x(v.prototype,{getContext:function(){var a=this.chart,b=a.chartWidth,e=a.chartHeight,f=a.seriesGroup||this.group,c=this,m=function(a,c,e,b,f,d,g){a.call(this,e,c,b,f,d,g)};a.isChartSeriesBoosting()&&
 (c=a,f=a.seriesGroup);var g=c.ctx;c.canvas||(c.canvas=B.createElement("canvas"),c.renderTarget=a.renderer.image("",0,0,b,e).addClass("highcharts-boost-canvas").add(f),c.ctx=g=c.canvas.getContext("2d"),a.inverted&&["moveTo","lineTo","rect","arc"].forEach(function(a){y(g,a,m)}),c.boostCopy=function(){c.renderTarget.attr({href:c.canvas.toDataURL("image/png")})},c.boostClear=function(){g.clearRect(0,0,c.canvas.width,c.canvas.height);c===this&&c.renderTarget.attr({href:""})},c.boostClipRect=a.renderer.clipRect(),

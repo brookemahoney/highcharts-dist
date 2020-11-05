@@ -1,5 +1,5 @@
 /**
- * @license Highstock JS v8.2.2 (2020-10-22)
+ * @license Highstock JS v8.2.2 (2020-11-05)
  *
  * Indicator series type for Highstock
  *
@@ -90,7 +90,7 @@
 
         return requiredIndicatorMixin;
     });
-    _registerModule(_modules, 'Stock/Indicators/SMAIndicator.js', [_modules['Core/Series/Series.js'], _modules['Core/Globals.js'], _modules['Mixins/IndicatorRequired.js'], _modules['Core/Utilities.js']], function (BaseSeries, H, requiredIndicator, U) {
+    _registerModule(_modules, 'Stock/Indicators/SMAIndicator.js', [_modules['Core/Series/Series.js'], _modules['Series/Line/LineSeries.js'], _modules['Mixins/IndicatorRequired.js'], _modules['Core/Utilities.js']], function (BaseSeries, LineSeries, RequiredIndicatorMixin, U) {
         /* *
          *
          *  License: www.highcharts.com/license
@@ -105,9 +105,8 @@
             isArray = U.isArray,
             pick = U.pick,
             splat = U.splat;
-        var Series = H.Series,
-            ohlcProto = seriesTypes.ohlc.prototype,
-            generateMessage = requiredIndicator.generateMessage;
+        var ohlcProto = seriesTypes.ohlc.prototype,
+            generateMessage = RequiredIndicatorMixin.generateMessage;
         /**
          * The parameter allows setting line series type and use OHLC indicators. Data
          * in OHLC format is required.
@@ -120,7 +119,7 @@
          * @apioption plotOptions.line.useOhlcData
          */
         /* eslint-disable no-invalid-this */
-        addEvent(H.Series, 'init', function (eventOptions) {
+        addEvent(LineSeries, 'init', function (eventOptions) {
             var series = this,
                 options = eventOptions.options;
             if (options.useOhlcData &&
@@ -133,7 +132,7 @@
                 });
             }
         });
-        addEvent(Series, 'afterSetOptions', function (e) {
+        addEvent(LineSeries, 'afterSetOptions', function (e) {
             var options = e.options,
                 dataGrouping = options.dataGrouping;
             if (dataGrouping &&
@@ -229,7 +228,7 @@
                 var series = this,
                     compareToMain = series.options.compareToMain,
                     linkedParent = series.linkedParent;
-                Series.prototype.processData.apply(series, arguments);
+                LineSeries.prototype.processData.apply(series, arguments);
                 if (linkedParent && linkedParent.compareValue && compareToMain) {
                     series.compareValue = linkedParent.compareValue;
                 }
@@ -270,7 +269,7 @@
                 if (!requiredIndicators.allLoaded) {
                     return error(generateMessage(indicator.type, requiredIndicators.needed));
                 }
-                Series.prototype.init.call(indicator, chart, options);
+                LineSeries.prototype.init.call(indicator, chart, options);
                 // Make sure we find series which is a base for an indicator
                 chart.linkSeries();
                 indicator.dataEventsToUnbind = [];
@@ -281,12 +280,12 @@
                 function recalculateValues() {
                     var oldData = indicator.points || [],
                         oldDataLength = (indicator.xData || []).length,
-                        processedData = indicator.getValues(indicator.linkedParent,
+                        processedData = (indicator.getValues(indicator.linkedParent,
                         indicator.options.params) || {
                             values: [],
                             xData: [],
                             yData: []
-                        },
+                        }),
                         croppedDataValues = [],
                         overwriteData = true,
                         oldFirstPointIndex,
@@ -428,7 +427,7 @@
                 this.dataEventsToUnbind.forEach(function (unbinder) {
                     unbinder();
                 });
-                Series.prototype.destroy.apply(this, arguments);
+                LineSeries.prototype.destroy.apply(this, arguments);
             }
         });
         /**

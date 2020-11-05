@@ -1,5 +1,5 @@
 /**
- * @license Highcharts JS v8.2.2 (2020-10-22)
+ * @license Highcharts JS v8.2.2 (2020-11-05)
  *
  * Highcharts funnel module
  *
@@ -28,7 +28,7 @@
             obj[path] = fn.apply(null, args);
         }
     }
-    _registerModule(_modules, 'Series/FunnelSeries.js', [_modules['Core/Series/Series.js'], _modules['Core/Chart/Chart.js'], _modules['Core/Globals.js'], _modules['Core/Utilities.js']], function (BaseSeries, Chart, H, U) {
+    _registerModule(_modules, 'Series/FunnelSeries.js', [_modules['Core/Series/Series.js'], _modules['Core/Chart/Chart.js'], _modules['Core/Globals.js'], _modules['Series/Line/LineSeries.js'], _modules['Core/Utilities.js']], function (BaseSeries, Chart, H, LineSeries, U) {
         /* *
          *
          *  Highcharts funnel module
@@ -443,7 +443,7 @@
                 options.verticalAlign = 'bottom';
                 // Call the parent method
                 if (!inside || point.visible) {
-                    Highcharts.Series.prototype.alignDataLabel.call(this, point, dataLabel, options, alignTo, isNew);
+                    LineSeries.prototype.alignDataLabel.call(this, point, dataLabel, options, alignTo, isNew);
                 }
                 if (inside) {
                     if (!point.visible && point.dataLabel) {

@@ -1,5 +1,5 @@
 /**
- * @license Highcharts JS v8.2.2 (2020-10-22)
+ * @license Highcharts JS v8.2.2 (2020-11-05)
  *
  * Annotations module
  *
@@ -420,7 +420,7 @@
 
         return ControlPoint;
     });
-    _registerModule(_modules, 'Extensions/Annotations/MockPoint.js', [_modules['Core/Globals.js'], _modules['Core/Utilities.js'], _modules['Core/Axis/Axis.js']], function (H, U, Axis) {
+    _registerModule(_modules, 'Extensions/Annotations/MockPoint.js', [_modules['Series/Line/LineSeries.js'], _modules['Core/Utilities.js'], _modules['Core/Axis/Axis.js']], function (LineSeries, U, Axis) {
         /* *
          *
          *  !!!!!!! SOURCE GETS TRANSPILED BY TYPESCRIPT. EDIT TS FILE ONLY. !!!!!!!
@@ -517,7 +517,7 @@
                 this.series = {
                     visible: true,
                     chart: chart,
-                    getPlotBox: H.Series.prototype.getPlotBox
+                    getPlotBox: LineSeries.prototype.getPlotBox
                 };
                 /**
                  * @name Annotation.AnnotationMockPoint#target

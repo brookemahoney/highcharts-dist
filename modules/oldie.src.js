@@ -1,5 +1,5 @@
 /**
- * @license Highcharts JS v8.2.2 (2020-10-22)
+ * @license Highcharts JS v8.2.2 (2020-11-05)
  *
  * Old IE (v6, v7, v8) module for Highcharts v6+.
  *
@@ -99,10 +99,10 @@
          * @private
          * @function Highcharts.perspective3D
          *
-         * @param {Highcharts.Position3dObject} coordinate
+         * @param {Highcharts.Position3DObject} coordinate
          * 3D position
          *
-         * @param {Highcharts.Position3dObject} origin
+         * @param {Highcharts.Position3DObject} origin
          * 3D root position
          *
          * @param {number} distance
@@ -113,24 +113,23 @@
          *
          * @requires highcharts-3d
          */
-        var perspective3D = H.perspective3D = function (coordinate,
-            origin,
-            distance) {
-                var projection = ((distance > 0) && (distance < Number.POSITIVE_INFINITY)) ?
+        function perspective3D(coordinate, origin, distance) {
+            var projection = ((distance > 0) && (distance < Number.POSITIVE_INFINITY)) ?
                     distance / (coordinate.z + origin.z + distance) :
                     1;
             return {
                 x: coordinate.x * projection,
                 y: coordinate.y * projection
             };
-        };
+        }
+        H.perspective3D = perspective3D;
         /**
          * Transforms a given array of points according to the angles in chart.options.
          *
          * @private
          * @function Highcharts.perspective
          *
-         * @param {Array<Highcharts.Position3dObject>} points
+         * @param {Array<Highcharts.Position3DObject>} points
          * The array of points
          *
          * @param {Highcharts.Chart} chart
@@ -142,32 +141,29 @@
          * @param {boolean} [useInvertedPersp]
          * Whether to use inverted perspective in calculations
          *
-         * @return {Array<Highcharts.Position3dObject>}
+         * @return {Array<Highcharts.Position3DObject>}
          * An array of transformed points
          *
          * @requires highcharts-3d
          */
-        var perspective = H.perspective = function (points,
-            chart,
-            insidePlotArea,
-            useInvertedPersp) {
-                var options3d = chart.options.chart.options3d, 
+        function perspective(points, chart, insidePlotArea, useInvertedPersp) {
+            var options3d = chart.options.chart.options3d, 
                 /* The useInvertedPersp argument is used for
                  * inverted charts with already inverted elements,
                  * such as dataLabels or tooltip positions.
                  */
                 inverted = pick(useInvertedPersp,
-            insidePlotArea ? chart.inverted : false),
-            origin = {
+                insidePlotArea ? chart.inverted : false),
+                origin = {
                     x: chart.plotWidth / 2,
                     y: chart.plotHeight / 2,
                     z: options3d.depth / 2,
                     vd: pick(options3d.depth, 1) * pick(options3d.viewDistance, 0)
                 },
-            scale = chart.scale3d || 1,
-            beta = deg2rad * options3d.beta * (inverted ? -1 : 1),
-            alpha = deg2rad * options3d.alpha * (inverted ? -1 : 1),
-            angles = {
+                scale = chart.scale3d || 1,
+                beta = deg2rad * options3d.beta * (inverted ? -1 : 1),
+                alpha = deg2rad * options3d.alpha * (inverted ? -1 : 1),
+                angles = {
                     cosA: Math.cos(alpha),
                     cosB: Math.cos(-beta),
                     sinA: Math.sin(alpha),
@@ -195,7 +191,8 @@
                     z: coordinate.z
                 };
             });
-        };
+        }
+        H.perspective = perspective;
         /**
          * Calculate a distance from camera to points - made for calculating zIndex of
          * scatter points.
@@ -214,10 +211,9 @@
          *
          * @requires highcharts-3d
          */
-        var pointCameraDistance = H.pointCameraDistance = function (coordinates,
-            chart) {
-                var options3d = chart.options.chart.options3d,
-            cameraPosition = {
+        function pointCameraDistance(coordinates, chart) {
+            var options3d = chart.options.chart.options3d,
+                cameraPosition = {
                     x: chart.plotWidth / 2,
                     y: chart.plotHeight / 2,
                     z: pick(options3d.depth, 1) * pick(options3d.viewDistance, 0) +
@@ -225,13 +221,14 @@
                 }, 
                 // Added support for objects with plotX or x coordinates.
                 distance = Math.sqrt(Math.pow(cameraPosition.x - pick(coordinates.plotX,
-            coordinates.x), 2) +
+                coordinates.x), 2) +
                     Math.pow(cameraPosition.y - pick(coordinates.plotY,
-            coordinates.y), 2) +
+                coordinates.y), 2) +
                     Math.pow(cameraPosition.z - pick(coordinates.plotZ,
-            coordinates.z), 2));
+                coordinates.z), 2));
             return distance;
-        };
+        }
+        H.pointCameraDistance = pointCameraDistance;
         /**
          * Calculate area of a 2D polygon using Shoelace algorithm
          * https://en.wikipedia.org/wiki/Shoelace_formula
@@ -247,23 +244,24 @@
          *
          * @requires highcharts-3d
          */
-        var shapeArea = H.shapeArea = function (vertexes) {
-                var area = 0,
-            i,
-            j;
+        function shapeArea(vertexes) {
+            var area = 0,
+                i,
+                j;
             for (i = 0; i < vertexes.length; i++) {
                 j = (i + 1) % vertexes.length;
                 area += vertexes[i].x * vertexes[j].y - vertexes[j].x * vertexes[i].y;
             }
             return area / 2;
-        };
+        }
+        H.shapeArea = shapeArea;
         /**
          * Calculate area of a 3D polygon after perspective projection
          *
          * @private
          * @function Highcharts.shapeArea3d
          *
-         * @param {Array<Highcharts.Position3dObject>} vertexes
+         * @param {Array<Highcharts.Position3DObject>} vertexes
          * 3D Polygon
          *
          * @param {Highcharts.Chart} chart
@@ -277,13 +275,10 @@
          *
          * @requires highcharts-3d
          */
-        var shapeArea3D = H.shapeArea3d = function (vertexes,
-            chart,
-            insidePlotArea) {
-                return shapeArea(perspective(vertexes,
-            chart,
-            insidePlotArea));
-        };
+        function shapeArea3D(vertexes, chart, insidePlotArea) {
+            return shapeArea(perspective(vertexes, chart, insidePlotArea));
+        }
+        H.shapeArea3d = shapeArea3D;
         var mathModule = {
                 perspective: perspective,
                 perspective3D: perspective3D,
@@ -2696,7 +2691,8 @@
             H.VMLRenderer = VMLRenderer = function () {
                 this.init.apply(this, arguments);
             };
-            VMLRenderer.prototype = merge(VMLRenderer.prototype, SVGRenderer.prototype, VMLRendererExtension);
+            extend(VMLRenderer.prototype, SVGRenderer.prototype);
+            extend(VMLRenderer.prototype, VMLRendererExtension);
             // general renderer
             H.Renderer = VMLRenderer;
             // 3D additions

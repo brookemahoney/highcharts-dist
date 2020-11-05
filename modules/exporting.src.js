@@ -1,5 +1,5 @@
 /**
- * @license Highcharts JS v8.2.2 (2020-10-22)
+ * @license Highcharts JS v8.2.2 (2020-11-05)
  *
  * Exporting module
  *
@@ -2318,8 +2318,6 @@
                 });
                 chart.isDirtyExporting = false;
             }
-            // Destroy the export elements at chart destroy
-            addEvent(chart, 'destroy', chart.destroyExport);
         };
         /* eslint-disable no-invalid-this */
         // Add update methods to handle chart.update and chart.exporting.update and
@@ -2361,6 +2359,8 @@
         Chart.prototype.callbacks.push(function (chart) {
             chart.renderExporting();
             addEvent(chart, 'redraw', chart.renderExporting);
+            // Destroy the export elements at chart destroy
+            addEvent(chart, 'destroy', chart.destroyExport);
             // Uncomment this to see a button directly below the chart, for quick
             // testing of export
             /*

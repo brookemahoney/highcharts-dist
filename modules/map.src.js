@@ -1,5 +1,5 @@
 /**
- * @license Highmaps JS v8.2.2 (2020-10-22)
+ * @license Highmaps JS v8.2.2 (2020-11-05)
  *
  * Highmaps as a plugin for Highcharts or Highstock.
  *
@@ -281,7 +281,7 @@
 
         return exports;
     });
-    _registerModule(_modules, 'Core/Axis/ColorAxis.js', [_modules['Core/Axis/Axis.js'], _modules['Core/Chart/Chart.js'], _modules['Core/Color/Color.js'], _modules['Mixins/ColorSeries.js'], _modules['Core/Animation/Fx.js'], _modules['Core/Globals.js'], _modules['Core/Legend.js'], _modules['Mixins/LegendSymbol.js'], _modules['Series/LineSeries.js'], _modules['Core/Series/Point.js'], _modules['Core/Utilities.js']], function (Axis, Chart, Color, ColorSeriesModule, Fx, H, Legend, LegendSymbolMixin, LineSeries, Point, U) {
+    _registerModule(_modules, 'Core/Axis/ColorAxis.js', [_modules['Core/Axis/Axis.js'], _modules['Core/Chart/Chart.js'], _modules['Core/Color/Color.js'], _modules['Mixins/ColorSeries.js'], _modules['Core/Animation/Fx.js'], _modules['Core/Globals.js'], _modules['Core/Legend.js'], _modules['Mixins/LegendSymbol.js'], _modules['Series/Line/LineSeries.js'], _modules['Core/Series/Point.js'], _modules['Core/Utilities.js']], function (Axis, Chart, Color, ColorSeriesModule, Fx, H, Legend, LegendSymbolMixin, LineSeries, Point, U) {
         /* *
          *
          *  (c) 2010-2020 Torstein Honsi
@@ -2402,7 +2402,7 @@
 
         return mapModule;
     });
-    _registerModule(_modules, 'Series/MapSeries.js', [_modules['Core/Series/Series.js'], _modules['Mixins/ColorMapSeries.js'], _modules['Core/Globals.js'], _modules['Mixins/LegendSymbol.js'], _modules['Maps/Map.js'], _modules['Core/Series/Point.js'], _modules['Core/Renderer/SVG/SVGRenderer.js'], _modules['Core/Utilities.js']], function (BaseSeries, ColorMapMixin, H, LegendSymbolMixin, mapModule, Point, SVGRenderer, U) {
+    _registerModule(_modules, 'Series/MapSeries.js', [_modules['Core/Series/Series.js'], _modules['Mixins/ColorMapSeries.js'], _modules['Core/Globals.js'], _modules['Mixins/LegendSymbol.js'], _modules['Series/Line/LineSeries.js'], _modules['Maps/Map.js'], _modules['Core/Series/Point.js'], _modules['Core/Renderer/SVG/SVGRenderer.js'], _modules['Core/Utilities.js']], function (BaseSeries, ColorMapMixin, H, LegendSymbolMixin, LineSeries, mapModule, Point, SVGRenderer, U) {
         /* *
          *
          *  (c) 2010-2020 Torstein Honsi
@@ -2412,6 +2412,7 @@
          *  !!!!!!! SOURCE GETS TRANSPILED BY TYPESCRIPT. EDIT TS FILE ONLY. !!!!!!!
          *
          * */
+        var seriesTypes = BaseSeries.seriesTypes;
         var colorMapPointMixin = ColorMapMixin.colorMapPointMixin,
             colorMapSeriesMixin = ColorMapMixin.colorMapSeriesMixin;
         var noop = H.noop;
@@ -2426,8 +2427,6 @@
             objectEach = U.objectEach,
             pick = U.pick,
             splat = U.splat;
-        var Series = H.Series,
-            seriesTypes = BaseSeries.seriesTypes;
         /**
          * @private
          * @class
@@ -2583,6 +2582,8 @@
              * @default   hc-key
              * @product   highmaps
              * @apioption plotOptions.series.joinBy
+             *
+             * @private
              */
             joinBy: 'hc-key',
             /**
@@ -2688,7 +2689,7 @@
             // Extend setOptions by picking up the joinBy option and applying it
             // to a series property
             setOptions: function (itemOptions) {
-                var options = Series.prototype.setOptions.call(this,
+                var options = LineSeries.prototype.setOptions.call(this,
                     itemOptions),
                     joinBy = options.joinBy,
                     joinByNull = joinBy === null;
@@ -2784,7 +2785,7 @@
             },
             getExtremes: function () {
                 // Get the actual value extremes for colors
-                var _a = Series.prototype.getExtremes
+                var _a = LineSeries.prototype.getExtremes
                         .call(this,
                     this.valueData),
                     dataMin = _a.dataMin,
@@ -2994,7 +2995,7 @@
                         this.getBox(dataUsed); // Issue #4784
                     }
                 }
-                Series.prototype.setData.call(this, data, redraw, animation, updatePoints);
+                LineSeries.prototype.setData.call(this, data, redraw, animation, updatePoints);
             },
             // No graph for the map series
             drawGraph: noop,
@@ -3217,7 +3218,7 @@
             // labels are drawn (after points), and the clipping of the
             // dataLabelsGroup.
             drawMapDataLabels: function () {
-                Series.prototype.drawDataLabels.call(this);
+                LineSeries.prototype.drawDataLabels.call(this);
                 if (this.dataLabelsGroup) {
                     this.dataLabelsGroup.clip(this.chart.clipRect);
                 }
@@ -3226,7 +3227,7 @@
             // on the US counties demo.
             render: function () {
                 var series = this,
-                    render = Series.prototype.render;
+                    render = LineSeries.prototype.render;
                 // Give IE8 some time to breathe.
                 if (series.chart.renderer.isVML && series.data.length > 3000) {
                     setTimeout(function () {
@@ -3310,14 +3311,12 @@
             // lower series and animate them into the origin point in the upper
             // series.
             animateDrillupFrom: function (level) {
-                seriesTypes.column.prototype
-                    .animateDrillupFrom.call(this, level);
+                seriesTypes.column.prototype.animateDrillupFrom.call(this, level);
             },
             // When drilling up, keep the upper series invisible until the lower
             // series has moved into place
             animateDrillupTo: function (init) {
-                seriesTypes.column.prototype
-                    .animateDrillupTo.call(this, init);
+                seriesTypes.column.prototype.animateDrillupTo.call(this, init);
             }
             // Point class
         }), extend({
@@ -3684,7 +3683,7 @@
         ''; // adds doclets above to transpiled file
 
     });
-    _registerModule(_modules, 'Series/MapPointSeries.js', [_modules['Core/Series/Series.js'], _modules['Core/Globals.js'], _modules['Core/Series/Point.js'], _modules['Core/Utilities.js']], function (BaseSeries, H, Point, U) {
+    _registerModule(_modules, 'Series/MapPointSeries.js', [_modules['Core/Series/Series.js'], _modules['Series/Line/LineSeries.js'], _modules['Core/Series/Point.js'], _modules['Core/Utilities.js']], function (BaseSeries, LineSeries, Point, U) {
         /* *
          *
          *  (c) 2010-2020 Torstein Honsi
@@ -3695,7 +3694,6 @@
          *
          * */
         var merge = U.merge;
-        var Series = H.Series;
         /**
          * @private
          * @class
@@ -3734,7 +3732,7 @@
             type: 'mappoint',
             forceDL: true,
             drawDataLabels: function () {
-                Series.prototype.drawDataLabels.call(this);
+                LineSeries.prototype.drawDataLabels.call(this);
                 if (this.dataLabelsGroup) {
                     this.dataLabelsGroup.clip(this.chart.clipRect);
                 }
@@ -3857,7 +3855,7 @@
         ''; // adds doclets above to transpiled file
 
     });
-    _registerModule(_modules, 'Series/Bubble/BubbleLegend.js', [_modules['Core/Chart/Chart.js'], _modules['Core/Color/Color.js'], _modules['Core/Globals.js'], _modules['Core/Legend.js'], _modules['Core/Utilities.js']], function (Chart, Color, H, Legend, U) {
+    _registerModule(_modules, 'Series/Bubble/BubbleLegend.js', [_modules['Core/Chart/Chart.js'], _modules['Core/Color/Color.js'], _modules['Core/Globals.js'], _modules['Core/Legend.js'], _modules['Series/Line/LineSeries.js'], _modules['Core/Utilities.js']], function (Chart, Color, H, Legend, LineSeries, U) {
         /* *
          *
          *  (c) 2010-2020 Highsoft AS
@@ -3870,6 +3868,7 @@
          *
          * */
         var color = Color.parse;
+        var noop = H.noop;
         var addEvent = U.addEvent,
             arrayMax = U.arrayMax,
             arrayMin = U.arrayMin,
@@ -3896,8 +3895,6 @@
         * @type {number}
         */
         ''; // detach doclets above
-        var Series = H.Series,
-            noop = H.noop;
         setOptions({
             legend: {
                 /**
@@ -4789,7 +4786,7 @@
             });
         };
         // Toggle bubble legend depending on the visible status of bubble series.
-        addEvent(Series, 'legendItemClick', function () {
+        addEvent(LineSeries, 'legendItemClick', function () {
             var series = this,
                 chart = series.chart,
                 visible = series.visible,
@@ -4873,7 +4870,7 @@
 
         return H.BubbleLegend;
     });
-    _registerModule(_modules, 'Series/Bubble/BubbleSeries.js', [_modules['Core/Axis/Axis.js'], _modules['Core/Series/Series.js'], _modules['Core/Color/Color.js'], _modules['Core/Globals.js'], _modules['Core/Series/Point.js'], _modules['Core/Utilities.js']], function (Axis, BaseSeries, Color, H, Point, U) {
+    _registerModule(_modules, 'Series/Bubble/BubbleSeries.js', [_modules['Core/Axis/Axis.js'], _modules['Core/Series/Series.js'], _modules['Core/Color/Color.js'], _modules['Core/Globals.js'], _modules['Series/Line/LineSeries.js'], _modules['Core/Series/Point.js'], _modules['Core/Utilities.js']], function (Axis, BaseSeries, Color, H, LineSeries, Point, U) {
         /* *
          *
          *  (c) 2010-2020 Torstein Honsi
@@ -4883,6 +4880,7 @@
          *  !!!!!!! SOURCE GETS TRANSPILED BY TYPESCRIPT. EDIT TS FILE ONLY. !!!!!!!
          *
          * */
+        var seriesTypes = BaseSeries.seriesTypes;
         var color = Color.parse;
         var noop = H.noop;
         var arrayMax = U.arrayMax,
@@ -4892,8 +4890,6 @@
             isNumber = U.isNumber,
             pick = U.pick,
             pInt = U.pInt;
-        var Series = H.Series,
-            seriesTypes = BaseSeries.seriesTypes;
         /**
          * @typedef {"area"|"width"} Highcharts.BubbleSizeByValue
          */
@@ -5144,7 +5140,7 @@
             pointAttribs: function (point, state) {
                 var markerOptions = this.options.marker,
                     fillOpacity = markerOptions.fillOpacity,
-                    attr = Series.prototype.pointAttribs.call(this,
+                    attr = LineSeries.prototype.pointAttribs.call(this,
                     point,
                     state);
                 if (fillOpacity !== 1) {
@@ -5718,7 +5714,7 @@
         ''; // adds doclets above to transpiled file
 
     });
-    _registerModule(_modules, 'Series/HeatmapSeries.js', [_modules['Core/Series/Series.js'], _modules['Mixins/ColorMapSeries.js'], _modules['Core/Globals.js'], _modules['Mixins/LegendSymbol.js'], _modules['Core/Renderer/SVG/SVGRenderer.js'], _modules['Core/Utilities.js']], function (BaseSeries, ColorMapMixin, H, LegendSymbolMixin, SVGRenderer, U) {
+    _registerModule(_modules, 'Series/HeatmapSeries.js', [_modules['Core/Series/Series.js'], _modules['Mixins/ColorMapSeries.js'], _modules['Core/Globals.js'], _modules['Core/Series/Point.js'], _modules['Mixins/LegendSymbol.js'], _modules['Series/Line/LineSeries.js'], _modules['Core/Renderer/SVG/SVGRenderer.js'], _modules['Core/Utilities.js']], function (BaseSeries, ColorMapMixin, H, Point, LegendSymbolMixin, LineSeries, SVGRenderer, U) {
         /* *
          *
          *  (c) 2010-2020 Torstein Honsi
@@ -5728,6 +5724,7 @@
          *  !!!!!!! SOURCE GETS TRANSPILED BY TYPESCRIPT. EDIT TS FILE ONLY. !!!!!!!
          *
          * */
+        var seriesTypes = BaseSeries.seriesTypes;
         var colorMapPointMixin = ColorMapMixin.colorMapPointMixin,
             colorMapSeriesMixin = ColorMapMixin.colorMapSeriesMixin;
         var noop = H.noop;
@@ -5737,9 +5734,7 @@
             isNumber = U.isNumber,
             merge = U.merge,
             pick = U.pick;
-        var Series = H.Series,
-            seriesTypes = BaseSeries.seriesTypes,
-            symbols = SVGRenderer.prototype.symbols;
+        var symbols = SVGRenderer.prototype.symbols;
         /* *
          * @interface Highcharts.PointOptionsObject in parts/Point.ts
          */ /**
@@ -6039,7 +6034,7 @@
              */
             init: function () {
                 var options;
-                Series.prototype.init.apply(this, arguments);
+                LineSeries.prototype.init.apply(this, arguments);
                 options = this.options;
                 // #3758, prevent resetting in setData
                 options.pointRange = pick(options.pointRange, options.colsize || 1);
@@ -6051,7 +6046,7 @@
                     rect: symbols.square
                 });
             },
-            getSymbol: Series.prototype.getSymbol,
+            getSymbol: LineSeries.prototype.getSymbol,
             /**
              * @private
              * @function Highcharts.seriesTypes.heatmap#setClip
@@ -6060,7 +6055,7 @@
             setClip: function (animation) {
                 var series = this,
                     chart = series.chart;
-                Series.prototype.setClip.apply(series, arguments);
+                LineSeries.prototype.setClip.apply(series, arguments);
                 if (series.options.clip !== false || animation) {
                     series.markerGroup
                         .clip((animation || series.clipBox) && series.sharedClipKey ?
@@ -6131,8 +6126,7 @@
              */
             pointAttribs: function (point, state) {
                 var series = this,
-                    attr = Series.prototype.pointAttribs
-                        .call(series,
+                    attr = LineSeries.prototype.pointAttribs.call(series,
                     point,
                     state),
                     seriesOptions = series.options || {},
@@ -6219,7 +6213,7 @@
                 // sheet will take precedence over the fill attribute.
                 var seriesMarkerOptions = this.options.marker || {};
                 if (seriesMarkerOptions.enabled || this._hasPointMarkers) {
-                    Series.prototype.drawPoints.call(this);
+                    LineSeries.prototype.drawPoints.call(this);
                     this.points.forEach(function (point) {
                         point.graphic &&
                             point.graphic[_this.chart.styledMode ? 'css' : 'animate'](_this.colorAttribs(point));
@@ -6234,7 +6228,7 @@
             // Override to also allow null points, used when building the k-d-tree
             // for tooltips in boost mode.
             getValidPoints: function (points, insideOnly) {
-                return Series.prototype.getValidPoints.call(this, points, insideOnly, true);
+                return LineSeries.prototype.getValidPoints.call(this, points, insideOnly, true);
             },
             /**
              * @ignore
@@ -6259,7 +6253,7 @@
              */
             getExtremes: function () {
                 // Get the extremes from the value data
-                var _a = Series.prototype.getExtremes
+                var _a = LineSeries.prototype.getExtremes
                         .call(this,
                     this.valueData),
                     dataMin = _a.dataMin,
@@ -6271,7 +6265,7 @@
                     this.valueMax = dataMax;
                 }
                 // Get the extremes from the y data
-                return Series.prototype.getExtremes.call(this);
+                return LineSeries.prototype.getExtremes.call(this);
             }
             /* eslint-enable valid-jsdoc */
         }), merge(colorMapPointMixin, {
@@ -6295,7 +6289,7 @@
              * @return {Highcharts.SVGPathArray}
              */
             applyOptions: function (options, x) {
-                var point = H.Point.prototype
+                var point = Point.prototype
                         .applyOptions.call(this,
                     options,
                     x);

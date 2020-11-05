@@ -1,5 +1,5 @@
 /**
- * @license Highcharts JS v8.2.2 (2020-10-22)
+ * @license Highcharts JS v8.2.2 (2020-11-05)
  *
  * Bullet graph series type for Highcharts
  *
@@ -28,7 +28,7 @@
             obj[path] = fn.apply(null, args);
         }
     }
-    _registerModule(_modules, 'Series/BulletSeries.js', [_modules['Core/Series/Series.js'], _modules['Core/Utilities.js']], function (BaseSeries, U) {
+    _registerModule(_modules, 'Series/BulletSeries.js', [_modules['Core/Series/Series.js'], _modules['Series/Column/ColumnSeries.js'], _modules['Core/Utilities.js']], function (BaseSeries, ColumnSeries, U) {
         /* *
          *
          *  (c) 2010-2020 Kacper Madej
@@ -38,11 +38,16 @@
          *  !!!!!!! SOURCE GETS TRANSPILED BY TYPESCRIPT. EDIT TS FILE ONLY. !!!!!!!
          *
          * */
+        var columnProto = ColumnSeries.prototype;
         var isNumber = U.isNumber,
             merge = U.merge,
             pick = U.pick,
             relativeLength = U.relativeLength;
-        var columnProto = BaseSeries.seriesTypes.column.prototype;
+        /* *
+         *
+         *  Class
+         *
+         * */
         /**
          * The bullet series type.
          *

@@ -1,5 +1,5 @@
 /**
- * @license Highcharts JS v8.2.2 (2020-10-22)
+ * @license Highcharts JS v8.2.2 (2020-11-05)
  * Organization chart series type
  *
  * (c) 2019-2019 Torstein Honsi
@@ -51,6 +51,11 @@
          * @typedef {"normal"|"hanging"} Highcharts.SeriesOrganizationNodesLayoutValue
          */
         ''; // detach doclets above
+        /* *
+         *
+         *  Class
+         *
+         * */
         /**
          * @private
          * @class

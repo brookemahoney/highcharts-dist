@@ -1,5 +1,5 @@
 /**
- * @license Highcharts JS v8.2.2 (2020-10-22)
+ * @license Highcharts JS v8.2.2 (2020-11-05)
  *
  * Boost module
  *
@@ -812,7 +812,8 @@
             //  // Shader
             var shader = false, 
                 // Vertex buffers - keyed on shader attribute name
-                vbuffer = false, 
+                vbuffer = false,
+                vlen = 0, 
                 // Opengl context
                 gl = false, 
                 // Width of our viewport in pixels
@@ -1033,6 +1034,7 @@
                     pushColor(color);
                     if (settings.usePreallocated) {
                         vbuffer.push(x, y, checkTreshold ? 1 : 0, pointSize || 1);
+                        vlen += 4;
                     }
                     else {
                         data.push(x);
@@ -1046,7 +1048,7 @@
                  */
                 function closeSegment() {
                     if (inst.segments.length) {
-                        inst.segments[inst.segments.length - 1].to = data.length;
+                        inst.segments[inst.segments.length - 1].to = data.length || vlen;
                     }
                 }
                 /**
@@ -1059,12 +1061,12 @@
                     // When adding a segment, if one exists from before, it should
                     // set the previous segment's end
                     if (inst.segments.length &&
-                        inst.segments[inst.segments.length - 1].from === data.length) {
+                        inst.segments[inst.segments.length - 1].from === (data.length || vlen)) {
                         return;
                     }
                     closeSegment();
                     inst.segments.push({
-                        from: data.length
+                        from: data.length || vlen
                     });
                 }
                 /**
@@ -1626,7 +1628,9 @@
                     }
                     else {
                         fillColor =
-                            (s.series.pointAttribs && s.series.pointAttribs().fill) ||
+                            (s.drawMode === 'points' && // #14260
+                                s.series.pointAttribs &&
+                                s.series.pointAttribs().fill) ||
                                 s.series.color;
                         if (options.colorByPoint) {
                             fillColor = s.series.chart.options.colors[si];
@@ -2358,7 +2362,7 @@
 
         return funs;
     });
-    _registerModule(_modules, 'Extensions/Boost/BoostInit.js', [_modules['Core/Chart/Chart.js'], _modules['Core/Globals.js'], _modules['Core/Utilities.js'], _modules['Extensions/Boost/BoostUtils.js'], _modules['Extensions/Boost/BoostAttach.js']], function (Chart, H, U, butils, createAndAttachRenderer) {
+    _registerModule(_modules, 'Extensions/Boost/BoostInit.js', [_modules['Core/Series/Series.js'], _modules['Core/Chart/Chart.js'], _modules['Core/Globals.js'], _modules['Series/Line/LineSeries.js'], _modules['Core/Utilities.js'], _modules['Extensions/Boost/BoostUtils.js'], _modules['Extensions/Boost/BoostAttach.js']], function (BaseSeries, Chart, H, LineSeries, U, butils, createAndAttachRenderer) {
         /* *
          *
          *  Copyright (c) 2019-2020 Highsoft AS
@@ -2370,14 +2374,13 @@
          *  !!!!!!! SOURCE GETS TRANSPILED BY TYPESCRIPT. EDIT TS FILE ONLY. !!!!!!!
          *
          * */
+        var seriesTypes = BaseSeries.seriesTypes;
+        var noop = H.noop;
         var addEvent = U.addEvent,
             extend = U.extend,
             fireEvent = U.fireEvent,
             wrap = U.wrap;
-        var Series = H.Series,
-            seriesTypes = H.seriesTypes,
-            noop = function () { },
-            eachAsync = butils.eachAsync,
+        var eachAsync = butils.eachAsync,
             pointDrawHandler = butils.pointDrawHandler,
             allocateIfNotSeriesBoosting = butils.allocateIfNotSeriesBoosting,
             renderIfNotSeriesBoosting = butils.renderIfNotSeriesBoosting,
@@ -2391,7 +2394,7 @@
          * @return {void}
          */
         function init() {
-            extend(Series.prototype, {
+            extend(LineSeries.prototype, {
                 /**
                  * @private
                  * @function Highcharts.Series#renderCanvas
@@ -2665,7 +2668,7 @@
 
         return init;
     });
-    _registerModule(_modules, 'Extensions/BoostCanvas.js', [_modules['Core/Chart/Chart.js'], _modules['Core/Color/Color.js'], _modules['Core/Globals.js'], _modules['Series/LineSeries.js'], _modules['Core/Series/Series.js'], _modules['Core/Utilities.js']], function (Chart, Color, H, LineSeries, Series, U) {
+    _registerModule(_modules, 'Extensions/BoostCanvas.js', [_modules['Core/Chart/Chart.js'], _modules['Core/Color/Color.js'], _modules['Core/Globals.js'], _modules['Series/Line/LineSeries.js'], _modules['Core/Series/Series.js'], _modules['Core/Utilities.js']], function (Chart, Color, H, LineSeries, Series, U) {
         /* *
          *
          *  License: www.highcharts.com/license
@@ -3214,7 +3217,7 @@
 
         return initCanvasBoost;
     });
-    _registerModule(_modules, 'Extensions/Boost/BoostOverrides.js', [_modules['Core/Chart/Chart.js'], _modules['Core/Globals.js'], _modules['Core/Series/Point.js'], _modules['Core/Utilities.js'], _modules['Extensions/Boost/BoostUtils.js'], _modules['Extensions/Boost/Boostables.js'], _modules['Extensions/Boost/BoostableMap.js']], function (Chart, H, Point, U, butils, boostable, boostableMap) {
+    _registerModule(_modules, 'Extensions/Boost/BoostOverrides.js', [_modules['Core/Series/Series.js'], _modules['Core/Chart/Chart.js'], _modules['Series/Line/LineSeries.js'], _modules['Core/Series/Point.js'], _modules['Core/Utilities.js'], _modules['Extensions/Boost/BoostUtils.js'], _modules['Extensions/Boost/Boostables.js'], _modules['Extensions/Boost/BoostableMap.js']], function (BaseSeries, Chart, LineSeries, Point, U, butils, boostable, boostableMap) {
         /* *
          *
          *  Copyright (c) 2019-2020 Highsoft AS
@@ -3226,6 +3229,7 @@
          *  !!!!!!! SOURCE GETS TRANSPILED BY TYPESCRIPT. EDIT TS FILE ONLY. !!!!!!!
          *
          * */
+        var seriesTypes = BaseSeries.seriesTypes;
         var addEvent = U.addEvent,
             error = U.error,
             getOptions = U.getOptions,
@@ -3235,8 +3239,6 @@
             wrap = U.wrap;
         var boostEnabled = butils.boostEnabled,
             shouldForceChartSeriesBoosting = butils.shouldForceChartSeriesBoosting,
-            Series = H.Series,
-            seriesTypes = H.seriesTypes,
             plotOptions = getOptions().plotOptions;
         /**
          * Returns true if the chart is in series boost mode.
@@ -3296,7 +3298,7 @@
          * @return {Highcharts.Point}
          *         A Point object as per https://api.highcharts.com/highcharts#Point
          */
-        Series.prototype.getPoint = function (boostPoint) {
+        LineSeries.prototype.getPoint = function (boostPoint) {
             var point = boostPoint,
                 xData = (this.xData || this.options.xData || this.processedXData ||
                     false);
@@ -3318,7 +3320,7 @@
         };
         /* eslint-disable no-invalid-this */
         // Return a point instance from the k-d-tree
-        wrap(Series.prototype, 'searchPoint', function (proceed) {
+        wrap(LineSeries.prototype, 'searchPoint', function (proceed) {
             return this.getPoint(proceed.apply(this, [].slice.call(arguments, 1)));
         });
         // For inverted series, we need to swap X-Y values before running base methods
@@ -3341,7 +3343,7 @@
             }
             return halo;
         });
-        wrap(Series.prototype, 'markerAttribs', function (proceed, point) {
+        wrap(LineSeries.prototype, 'markerAttribs', function (proceed, point) {
             var attribs,
                 series = this,
                 chart = series.chart,
@@ -3364,7 +3366,7 @@
          * Normally this is handled by Series.destroy that calls Point.destroy,
          * but the fake search points are not registered like that.
          */
-        addEvent(Series, 'destroy', function () {
+        addEvent(LineSeries, 'destroy', function () {
             var series = this,
                 chart = series.chart;
             if (chart.markerGroup === series.markerGroup) {
@@ -3384,7 +3386,7 @@
          * If we use this in the core, we can add the hook
          * to hasExtremes to the methods directly.
          */
-        wrap(Series.prototype, 'getExtremes', function (proceed) {
+        wrap(LineSeries.prototype, 'getExtremes', function (proceed) {
             if (!this.isSeriesBoosting || (!this.hasExtremes || !this.hasExtremes())) {
                 return proceed.apply(this, Array.prototype.slice.call(arguments, 1));
             }
@@ -3424,7 +3426,7 @@
                     this[method + 'Canvas']();
                 }
             }
-            wrap(Series.prototype, method, branch);
+            wrap(LineSeries.prototype, method, branch);
             // A special case for some types - their translate method is already wrapped
             if (method === 'translate') {
                 [
@@ -3443,7 +3445,7 @@
         });
         // If the series is a heatmap or treemap, or if the series is not boosting
         // do the default behaviour. Otherwise, process if the series has no extremes.
-        wrap(Series.prototype, 'processData', function (proceed) {
+        wrap(LineSeries.prototype, 'processData', function (proceed) {
             var series = this,
                 dataToMeasure = this.options.data,
                 firstPoint;
@@ -3491,7 +3493,7 @@
                 proceed.apply(this, Array.prototype.slice.call(arguments, 1));
             }
         });
-        addEvent(Series, 'hide', function () {
+        addEvent(LineSeries, 'hide', function () {
             if (this.canvas && this.renderTarget) {
                 if (this.ogl) {
                     this.ogl.clear();
@@ -3504,7 +3506,7 @@
          *
          * @function Highcharts.Series#enterBoost
          */
-        Series.prototype.enterBoost = function () {
+        LineSeries.prototype.enterBoost = function () {
             this.alteredByBoost = [];
             // Save the original values, including whether it was an own property or
             // inherited from the prototype.
@@ -3530,7 +3532,7 @@
          *
          * @function Highcharts.Series#exitBoost
          */
-        Series.prototype.exitBoost = function () {
+        LineSeries.prototype.exitBoost = function () {
             // Reset instance properties and/or delete instance properties and go back
             // to prototype
             (this.alteredByBoost || []).forEach(function (setting) {
@@ -3555,7 +3557,7 @@
          *
          * @return {boolean}
          */
-        Series.prototype.hasExtremes = function (checkX) {
+        LineSeries.prototype.hasExtremes = function (checkX) {
             var options = this.options,
                 data = options.data,
                 xAxis = this.xAxis && this.xAxis.options,
@@ -3578,7 +3580,7 @@
          *
          * @function Highcharts.Series#destroyGraphics
          */
-        Series.prototype.destroyGraphics = function () {
+        LineSeries.prototype.destroyGraphics = function () {
             var series = this,
                 points = this.points,
                 point,

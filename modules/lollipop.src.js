@@ -1,5 +1,5 @@
 /**
- * @license Highcharts JS v8.2.2 (2020-10-22)
+ * @license Highcharts JS v8.2.2 (2020-11-05)
  *
  * (c) 2009-2019 Sebastian Bochan, Rafal Sebestjanski
  *
@@ -26,7 +26,7 @@
             obj[path] = fn.apply(null, args);
         }
     }
-    _registerModule(_modules, 'Series/AreaRangeSeries.js', [_modules['Core/Series/Series.js'], _modules['Core/Globals.js'], _modules['Core/Series/Point.js'], _modules['Core/Utilities.js']], function (BaseSeries, H, Point, U) {
+    _registerModule(_modules, 'Series/AreaRangeSeries.js', [_modules['Core/Series/Series.js'], _modules['Series/Column/ColumnSeries.js'], _modules['Core/Globals.js'], _modules['Series/Line/LineSeries.js'], _modules['Core/Series/Point.js'], _modules['Core/Utilities.js']], function (BaseSeries, ColumnSeries, H, LineSeries, Point, U) {
         /* *
          *
          *  (c) 2010-2020 Torstein Honsi
@@ -36,17 +36,17 @@
          *  !!!!!!! SOURCE GETS TRANSPILED BY TYPESCRIPT. EDIT TS FILE ONLY. !!!!!!!
          *
          * */
+        var seriesTypes = BaseSeries.seriesTypes;
+        var columnProto = ColumnSeries.prototype;
         var noop = H.noop;
+        var seriesProto = LineSeries.prototype;
+        var pointProto = Point.prototype;
         var defined = U.defined,
             extend = U.extend,
             isArray = U.isArray,
             isNumber = U.isNumber,
             pick = U.pick;
-        var Series = H.Series,
-            areaProto = BaseSeries.seriesTypes.area.prototype,
-            columnProto = BaseSeries.seriesTypes.column.prototype,
-            pointProto = Point.prototype,
-            seriesProto = Series.prototype;
+        var areaProto = seriesTypes.area.prototype;
         /**
          * The area range series is a carteseian series with higher and lower values for
          * each point along an X axis, where the area between the values is shaded.
@@ -723,7 +723,7 @@
         ''; // adds doclets above to tranpiled file
 
     });
-    _registerModule(_modules, 'Series/ColumnRangeSeries.js', [_modules['Core/Series/Series.js'], _modules['Core/Globals.js'], _modules['Core/Options.js'], _modules['Core/Utilities.js']], function (BaseSeries, H, O, U) {
+    _registerModule(_modules, 'Series/ColumnRangeSeries.js', [_modules['Core/Series/Series.js'], _modules['Series/Column/ColumnSeries.js'], _modules['Core/Globals.js'], _modules['Core/Options.js'], _modules['Core/Utilities.js']], function (BaseSeries, ColumnSeries, H, O, U) {
         /* *
          *
          *  (c) 2010-2020 Torstein Honsi
@@ -733,12 +733,13 @@
          *  !!!!!!! SOURCE GETS TRANSPILED BY TYPESCRIPT. EDIT TS FILE ONLY. !!!!!!!
          *
          * */
+        var columnProto = ColumnSeries.prototype;
         var noop = H.noop;
         var defaultOptions = O.defaultOptions;
         var clamp = U.clamp,
             merge = U.merge,
             pick = U.pick;
-        var columnProto = BaseSeries.seriesTypes.column.prototype;
+        var arearangeProto = BaseSeries.seriesTypes.arearange.prototype;
         /**
          * The column range is a cartesian series type with higher and lower
          * Y values along an X axis. To display horizontal bars, set
@@ -789,6 +790,10 @@
          * @augments Highcharts.Series
          */
         BaseSeries.seriesType('columnrange', 'arearange', merge(defaultOptions.plotOptions.column, defaultOptions.plotOptions.arearange, columnRangeOptions), {
+            setOptions: function () {
+                merge(true, arguments[0], { stacking: void 0 }); // #14359 Prevent side-effect from stacking.
+                return arearangeProto.setOptions.apply(this, arguments);
+            },
             // eslint-disable-next-line valid-jsdoc
             /**
              * Translate data points from raw values x and y to plotX and plotY
@@ -880,6 +885,9 @@
             },
             pointAttribs: function () {
                 return columnProto.pointAttribs.apply(this, arguments);
+            },
+            adjustForMissingColumns: function () {
+                return columnProto.adjustForMissingColumns.apply(this, arguments);
             },
             animate: function () {
                 return columnProto.animate.apply(this, arguments);
@@ -980,7 +988,7 @@
         ''; // adds doclets above into transpiled
 
     });
-    _registerModule(_modules, 'Series/DumbbellSeries.js', [_modules['Core/Series/Series.js'], _modules['Core/Renderer/SVG/SVGRenderer.js'], _modules['Core/Globals.js'], _modules['Core/Utilities.js']], function (BaseSeries, SVGRenderer, H, U) {
+    _registerModule(_modules, 'Series/DumbbellSeries.js', [_modules['Core/Series/Series.js'], _modules['Series/Column/ColumnSeries.js'], _modules['Series/Line/LineSeries.js'], _modules['Core/Renderer/SVG/SVGRenderer.js'], _modules['Core/Globals.js'], _modules['Core/Utilities.js']], function (BaseSeries, ColumnSeries, LineSeries, SVGRenderer, H, U) {
         /* *
          *
          *  (c) 2010-2020 Sebastian Bochan, Rafal Sebestjanski
@@ -990,10 +998,18 @@
          *  !!!!!!! SOURCE GETS TRANSPILED BY TYPESCRIPT. EDIT TS FILE ONLY. !!!!!!!
          *
          * */
+        var seriesTypes = BaseSeries.seriesTypes;
+        var colProto = ColumnSeries.prototype;
+        var seriesProto = LineSeries.prototype;
         var noop = H.noop;
         var extend = U.extend,
             pick = U.pick;
-        var seriesProto = H.Series.prototype, seriesTypes = BaseSeries.seriesTypes, areaRangeProto = seriesTypes.arearange.prototype, columnRangeProto = seriesTypes.columnrange.prototype, colProto = seriesTypes.column.prototype, areaRangePointProto = areaRangeProto.pointClass.prototype, TrackerMixin = H.TrackerMixin; // Interaction
+        var areaRangeProto = seriesTypes.arearange.prototype, columnRangeProto = seriesTypes.columnrange.prototype, areaRangePointProto = areaRangeProto.pointClass.prototype, TrackerMixin = H.TrackerMixin; // Interaction
+            /* *
+             *
+             *  Class
+             *
+             * */
             /**
              * The dumbbell series is a cartesian series with higher and lower values for
              * each point along an X axis, connected with a line between the values.
@@ -1446,7 +1462,7 @@
         ''; // adds doclets above to transpiled file
 
     });
-    _registerModule(_modules, 'Series/LollipopSeries.js', [_modules['Core/Series/Point.js'], _modules['Core/Series/Series.js'], _modules['Core/Globals.js'], _modules['Core/Utilities.js']], function (Point, BaseSeries, H, U) {
+    _registerModule(_modules, 'Series/LollipopSeries.js', [_modules['Core/Series/Series.js'], _modules['Series/Column/ColumnSeries.js'], _modules['Core/Globals.js'], _modules['Core/Series/Point.js'], _modules['Core/Utilities.js']], function (BaseSeries, ColumnSeries, H, Point, U) {
         /* *
          *
          *  (c) 2010-2020 Sebastian Bochan, Rafal Sebestjanski
@@ -1456,11 +1472,11 @@
          *  !!!!!!! SOURCE GETS TRANSPILED BY TYPESCRIPT. EDIT TS FILE ONLY. !!!!!!!
          *
          * */
+        var seriesTypes = BaseSeries.seriesTypes;
+        var colProto = ColumnSeries.prototype;
         var isObject = U.isObject,
             pick = U.pick;
-        var seriesTypes = BaseSeries.seriesTypes,
-            areaProto = seriesTypes.area.prototype,
-            colProto = seriesTypes.column.prototype;
+        var areaProto = seriesTypes.area.prototype;
         /**
          * The lollipop series is a carteseian series with a line anchored from
          * the x axis and a dot at the end to mark the value.

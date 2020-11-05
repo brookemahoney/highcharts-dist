@@ -1,5 +1,5 @@
 /**
- * @license Highcharts JS v8.2.2 (2020-10-22)
+ * @license Highcharts JS v8.2.2 (2020-11-05)
  *
  * (c) 2009-2019 Torstein Honsi
  *
@@ -26,7 +26,7 @@
             obj[path] = fn.apply(null, args);
         }
     }
-    _registerModule(_modules, 'Extensions/DraggablePoints.js', [_modules['Core/Chart/Chart.js'], _modules['Core/Globals.js'], _modules['Core/Series/Point.js'], _modules['Core/Utilities.js']], function (Chart, H, Point, U) {
+    _registerModule(_modules, 'Extensions/DraggablePoints.js', [_modules['Core/Chart/Chart.js'], _modules['Core/Globals.js'], _modules['Series/Line/LineSeries.js'], _modules['Core/Series/Point.js'], _modules['Core/Utilities.js']], function (Chart, H, LineSeries, Point, U) {
         /* *
          *
          *  (c) 2009-2020 Highsoft AS
@@ -1881,7 +1881,7 @@
          * @return {Highcharts.SVGElement}
          *         An SVG element for the guide box, not added to DOM.
          */
-        H.Series.prototype.getGuideBox = function (points) {
+        LineSeries.prototype.getGuideBox = function (points) {
             var chart = this.chart,
                 minX = Infinity,
                 maxX = -Infinity,

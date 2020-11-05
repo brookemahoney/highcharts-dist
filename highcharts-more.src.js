@@ -1,5 +1,5 @@
 /**
- * @license Highcharts JS v8.2.2 (2020-10-22)
+ * @license Highcharts JS v8.2.2 (2020-11-05)
  *
  * (c) 2009-2018 Torstein Honsi
  *
@@ -1402,7 +1402,7 @@
 
         return RadialAxis;
     });
-    _registerModule(_modules, 'Series/AreaRangeSeries.js', [_modules['Core/Series/Series.js'], _modules['Core/Globals.js'], _modules['Core/Series/Point.js'], _modules['Core/Utilities.js']], function (BaseSeries, H, Point, U) {
+    _registerModule(_modules, 'Series/AreaRangeSeries.js', [_modules['Core/Series/Series.js'], _modules['Series/Column/ColumnSeries.js'], _modules['Core/Globals.js'], _modules['Series/Line/LineSeries.js'], _modules['Core/Series/Point.js'], _modules['Core/Utilities.js']], function (BaseSeries, ColumnSeries, H, LineSeries, Point, U) {
         /* *
          *
          *  (c) 2010-2020 Torstein Honsi
@@ -1412,17 +1412,17 @@
          *  !!!!!!! SOURCE GETS TRANSPILED BY TYPESCRIPT. EDIT TS FILE ONLY. !!!!!!!
          *
          * */
+        var seriesTypes = BaseSeries.seriesTypes;
+        var columnProto = ColumnSeries.prototype;
         var noop = H.noop;
+        var seriesProto = LineSeries.prototype;
+        var pointProto = Point.prototype;
         var defined = U.defined,
             extend = U.extend,
             isArray = U.isArray,
             isNumber = U.isNumber,
             pick = U.pick;
-        var Series = H.Series,
-            areaProto = BaseSeries.seriesTypes.area.prototype,
-            columnProto = BaseSeries.seriesTypes.column.prototype,
-            pointProto = Point.prototype,
-            seriesProto = Series.prototype;
+        var areaProto = seriesTypes.area.prototype;
         /**
          * The area range series is a carteseian series with higher and lower values for
          * each point along an X axis, where the area between the values is shaded.
@@ -2235,7 +2235,7 @@
         ''; // adds doclets above to transpiled file
 
     });
-    _registerModule(_modules, 'Series/ColumnRangeSeries.js', [_modules['Core/Series/Series.js'], _modules['Core/Globals.js'], _modules['Core/Options.js'], _modules['Core/Utilities.js']], function (BaseSeries, H, O, U) {
+    _registerModule(_modules, 'Series/ColumnRangeSeries.js', [_modules['Core/Series/Series.js'], _modules['Series/Column/ColumnSeries.js'], _modules['Core/Globals.js'], _modules['Core/Options.js'], _modules['Core/Utilities.js']], function (BaseSeries, ColumnSeries, H, O, U) {
         /* *
          *
          *  (c) 2010-2020 Torstein Honsi
@@ -2245,12 +2245,13 @@
          *  !!!!!!! SOURCE GETS TRANSPILED BY TYPESCRIPT. EDIT TS FILE ONLY. !!!!!!!
          *
          * */
+        var columnProto = ColumnSeries.prototype;
         var noop = H.noop;
         var defaultOptions = O.defaultOptions;
         var clamp = U.clamp,
             merge = U.merge,
             pick = U.pick;
-        var columnProto = BaseSeries.seriesTypes.column.prototype;
+        var arearangeProto = BaseSeries.seriesTypes.arearange.prototype;
         /**
          * The column range is a cartesian series type with higher and lower
          * Y values along an X axis. To display horizontal bars, set
@@ -2301,6 +2302,10 @@
          * @augments Highcharts.Series
          */
         BaseSeries.seriesType('columnrange', 'arearange', merge(defaultOptions.plotOptions.column, defaultOptions.plotOptions.arearange, columnRangeOptions), {
+            setOptions: function () {
+                merge(true, arguments[0], { stacking: void 0 }); // #14359 Prevent side-effect from stacking.
+                return arearangeProto.setOptions.apply(this, arguments);
+            },
             // eslint-disable-next-line valid-jsdoc
             /**
              * Translate data points from raw values x and y to plotX and plotY
@@ -2392,6 +2397,9 @@
             },
             pointAttribs: function () {
                 return columnProto.pointAttribs.apply(this, arguments);
+            },
+            adjustForMissingColumns: function () {
+                return columnProto.adjustForMissingColumns.apply(this, arguments);
             },
             animate: function () {
                 return columnProto.animate.apply(this, arguments);
@@ -2492,7 +2500,7 @@
         ''; // adds doclets above into transpiled
 
     });
-    _registerModule(_modules, 'Series/ColumnPyramidSeries.js', [_modules['Core/Series/Series.js'], _modules['Series/ColumnSeries.js'], _modules['Core/Utilities.js']], function (BaseSeries, ColumnSeries, U) {
+    _registerModule(_modules, 'Series/ColumnPyramidSeries.js', [_modules['Core/Series/Series.js'], _modules['Series/Column/ColumnSeries.js'], _modules['Core/Utilities.js']], function (BaseSeries, ColumnSeries, U) {
         /* *
          *
          *  (c) 2010-2020 Sebastian Bochan
@@ -2781,7 +2789,7 @@
         ''; // adds doclets above to transpiled file;
 
     });
-    _registerModule(_modules, 'Series/GaugeSeries.js', [_modules['Core/Series/Series.js'], _modules['Core/Globals.js'], _modules['Core/Utilities.js']], function (BaseSeries, H, U) {
+    _registerModule(_modules, 'Series/GaugeSeries.js', [_modules['Core/Series/Series.js'], _modules['Core/Globals.js'], _modules['Series/Line/LineSeries.js'], _modules['Core/Utilities.js']], function (BaseSeries, H, LineSeries, U) {
         /* *
          *
          *  (c) 2010-2020 Torstein Honsi
@@ -2797,8 +2805,12 @@
             merge = U.merge,
             pick = U.pick,
             pInt = U.pInt;
-        var Series = H.Series,
-            TrackerMixin = H.TrackerMixin;
+        var TrackerMixin = H.TrackerMixin;
+        /* *
+         *
+         *  Class
+         *
+         * */
         /**
          * Gauges are circular plots displaying one or more values with a dial pointing
          * to values along the perimeter.
@@ -3229,7 +3241,7 @@
              */
             render: function () {
                 this.group = this.plotGroup('group', 'series', this.visible ? 'visible' : 'hidden', this.options.zIndex, this.chart.seriesGroup);
-                Series.prototype.render.call(this);
+                LineSeries.prototype.render.call(this);
                 this.group.clip(this.chart.clipRect);
             },
             /**
@@ -3238,7 +3250,7 @@
              * @private
              */
             setData: function (data, redraw) {
-                Series.prototype.setData.call(this, data, false);
+                LineSeries.prototype.setData.call(this, data, false);
                 this.processData();
                 this.generatePoints();
                 if (pick(redraw, true)) {
@@ -3325,7 +3337,7 @@
         ''; // adds the doclets above in the transpiled file
 
     });
-    _registerModule(_modules, 'Series/BoxPlotSeries.js', [_modules['Core/Series/Series.js'], _modules['Series/ColumnSeries.js'], _modules['Core/Globals.js'], _modules['Core/Utilities.js']], function (Series, ColumnSeries, H, U) {
+    _registerModule(_modules, 'Series/BoxPlotSeries.js', [_modules['Core/Series/Series.js'], _modules['Series/Column/ColumnSeries.js'], _modules['Core/Globals.js'], _modules['Core/Utilities.js']], function (Series, ColumnSeries, H, U) {
         /* *
          *
          *  (c) 2010-2020 Torstein Honsi
@@ -3347,6 +3359,11 @@
          *
          * @augments Highcharts.Series
          */
+        /* *
+         *
+         *  Class
+         *
+         * */
         /**
          * A box plot is a convenient way of depicting groups of data through their
          * five-number summaries: the smallest observation (sample minimum), lower
@@ -4139,7 +4156,7 @@
         ''; // adds doclets above to transpiled file
 
     });
-    _registerModule(_modules, 'Series/WaterfallSeries.js', [_modules['Core/Axis/Axis.js'], _modules['Core/Series/Series.js'], _modules['Core/Chart/Chart.js'], _modules['Core/Globals.js'], _modules['Core/Series/Point.js'], _modules['Extensions/Stacking.js'], _modules['Core/Utilities.js']], function (Axis, BaseSeries, Chart, H, Point, StackItem, U) {
+    _registerModule(_modules, 'Series/WaterfallSeries.js', [_modules['Core/Axis/Axis.js'], _modules['Core/Series/Series.js'], _modules['Core/Chart/Chart.js'], _modules['Series/Line/LineSeries.js'], _modules['Core/Series/Point.js'], _modules['Extensions/Stacking.js'], _modules['Core/Utilities.js']], function (Axis, BaseSeries, Chart, LineSeries, Point, StackItem, U) {
         /* *
          *
          *  (c) 2010-2020 Torstein Honsi
@@ -4157,7 +4174,6 @@
             isNumber = U.isNumber,
             objectEach = U.objectEach,
             pick = U.pick;
-        var Series = H.Series;
         /**
          * Returns true if the key is a direct property of the object.
          * @private
@@ -4640,7 +4656,7 @@
                     dataMin = Math.min(sum, dataMin);
                     dataMax = Math.max(sum, dataMax);
                 }
-                Series.prototype.processData.call(this, force);
+                LineSeries.prototype.processData.call(this, force);
                 // Record extremes only if stacking was not set:
                 if (!options.stacking) {
                     series.dataMin = dataMin + threshold;
@@ -4659,7 +4675,7 @@
                 return pt.y;
             },
             updateParallelArrays: function (point, i) {
-                Series.prototype.updateParallelArrays.call(this, point, i);
+                LineSeries.prototype.updateParallelArrays.call(this, point, i);
                 // Prevent initial sums from triggering an error (#3245, #7559)
                 if (this.yData[0] === 'sum' || this.yData[0] === 'intermediateSum') {
                     this.yData[0] = null;
@@ -4753,7 +4769,7 @@
             // The graph is initially drawn with an empty definition, then updated with
             // crisp rendering.
             drawGraph: function () {
-                Series.prototype.drawGraph.call(this);
+                LineSeries.prototype.drawGraph.call(this);
                 this.graph.attr({
                     d: this.getCrispPath()
                 });
@@ -5040,7 +5056,7 @@
 
         return WaterfallAxis;
     });
-    _registerModule(_modules, 'Series/PolygonSeries.js', [_modules['Core/Series/Series.js'], _modules['Core/Globals.js'], _modules['Mixins/LegendSymbol.js']], function (BaseSeries, H, LegendSymbolMixin) {
+    _registerModule(_modules, 'Series/PolygonSeries.js', [_modules['Core/Series/Series.js'], _modules['Core/Globals.js'], _modules['Mixins/LegendSymbol.js'], _modules['Series/Line/LineSeries.js']], function (BaseSeries, H, LegendSymbolMixin, LineSeries) {
         /* *
          *
          *  (c) 2010-2020 Torstein Honsi
@@ -5052,7 +5068,6 @@
          * */
         var seriesTypes = BaseSeries.seriesTypes;
         var noop = H.noop;
-        var Series = H.Series;
         /**
          * A polygon series can be used to draw any freeform shape in the cartesian
          * coordinate system. A fill is applied with the `color` option, and
@@ -5090,7 +5105,7 @@
         }, {
             type: 'polygon',
             getGraphPath: function () {
-                var graphPath = Series.prototype.getGraphPath.call(this),
+                var graphPath = LineSeries.prototype.getGraphPath.call(this),
                     i = graphPath.length + 1;
                 // Close all segments
                 while (i--) {
@@ -5107,7 +5122,7 @@
                 seriesTypes.area.prototype.drawGraph.call(this);
             },
             drawLegendSymbol: LegendSymbolMixin.drawRectangle,
-            drawTracker: Series.prototype.drawTracker,
+            drawTracker: LineSeries.prototype.drawTracker,
             setStackedPoints: noop // No stacking points on polygons (#5310)
         });
         /**
@@ -5182,7 +5197,7 @@
         ''; // adds doclets above to transpiled file
 
     });
-    _registerModule(_modules, 'Series/Bubble/BubbleLegend.js', [_modules['Core/Chart/Chart.js'], _modules['Core/Color/Color.js'], _modules['Core/Globals.js'], _modules['Core/Legend.js'], _modules['Core/Utilities.js']], function (Chart, Color, H, Legend, U) {
+    _registerModule(_modules, 'Series/Bubble/BubbleLegend.js', [_modules['Core/Chart/Chart.js'], _modules['Core/Color/Color.js'], _modules['Core/Globals.js'], _modules['Core/Legend.js'], _modules['Series/Line/LineSeries.js'], _modules['Core/Utilities.js']], function (Chart, Color, H, Legend, LineSeries, U) {
         /* *
          *
          *  (c) 2010-2020 Highsoft AS
@@ -5195,6 +5210,7 @@
          *
          * */
         var color = Color.parse;
+        var noop = H.noop;
         var addEvent = U.addEvent,
             arrayMax = U.arrayMax,
             arrayMin = U.arrayMin,
@@ -5221,8 +5237,6 @@
         * @type {number}
         */
         ''; // detach doclets above
-        var Series = H.Series,
-            noop = H.noop;
         setOptions({
             legend: {
                 /**
@@ -6114,7 +6128,7 @@
             });
         };
         // Toggle bubble legend depending on the visible status of bubble series.
-        addEvent(Series, 'legendItemClick', function () {
+        addEvent(LineSeries, 'legendItemClick', function () {
             var series = this,
                 chart = series.chart,
                 visible = series.visible,
@@ -6198,7 +6212,7 @@
 
         return H.BubbleLegend;
     });
-    _registerModule(_modules, 'Series/Bubble/BubbleSeries.js', [_modules['Core/Axis/Axis.js'], _modules['Core/Series/Series.js'], _modules['Core/Color/Color.js'], _modules['Core/Globals.js'], _modules['Core/Series/Point.js'], _modules['Core/Utilities.js']], function (Axis, BaseSeries, Color, H, Point, U) {
+    _registerModule(_modules, 'Series/Bubble/BubbleSeries.js', [_modules['Core/Axis/Axis.js'], _modules['Core/Series/Series.js'], _modules['Core/Color/Color.js'], _modules['Core/Globals.js'], _modules['Series/Line/LineSeries.js'], _modules['Core/Series/Point.js'], _modules['Core/Utilities.js']], function (Axis, BaseSeries, Color, H, LineSeries, Point, U) {
         /* *
          *
          *  (c) 2010-2020 Torstein Honsi
@@ -6208,6 +6222,7 @@
          *  !!!!!!! SOURCE GETS TRANSPILED BY TYPESCRIPT. EDIT TS FILE ONLY. !!!!!!!
          *
          * */
+        var seriesTypes = BaseSeries.seriesTypes;
         var color = Color.parse;
         var noop = H.noop;
         var arrayMax = U.arrayMax,
@@ -6217,8 +6232,6 @@
             isNumber = U.isNumber,
             pick = U.pick,
             pInt = U.pInt;
-        var Series = H.Series,
-            seriesTypes = BaseSeries.seriesTypes;
         /**
          * @typedef {"area"|"width"} Highcharts.BubbleSizeByValue
          */
@@ -6469,7 +6482,7 @@
             pointAttribs: function (point, state) {
                 var markerOptions = this.options.marker,
                     fillOpacity = markerOptions.fillOpacity,
-                    attr = Series.prototype.pointAttribs.call(this,
+                    attr = LineSeries.prototype.pointAttribs.call(this,
                     point,
                     state);
                 if (fillOpacity !== 1) {
@@ -8269,7 +8282,7 @@
         });
 
     });
-    _registerModule(_modules, 'Series/PackedBubbleSeries.js', [_modules['Core/Series/Series.js'], _modules['Core/Chart/Chart.js'], _modules['Core/Color/Color.js'], _modules['Core/Globals.js'], _modules['Core/Series/Point.js'], _modules['Core/Utilities.js']], function (BaseSeries, Chart, Color, H, Point, U) {
+    _registerModule(_modules, 'Series/PackedBubbleSeries.js', [_modules['Core/Series/Series.js'], _modules['Core/Chart/Chart.js'], _modules['Core/Color/Color.js'], _modules['Core/Globals.js'], _modules['Series/Line/LineSeries.js'], _modules['Core/Series/Point.js'], _modules['Core/Utilities.js']], function (BaseSeries, Chart, Color, H, LineSeries, Point, U) {
         /* *
          *
          *  (c) 2010-2018 Grzegorz Blachlinski, Sebastian Bochan
@@ -8290,8 +8303,7 @@
             isNumber = U.isNumber,
             merge = U.merge,
             pick = U.pick;
-        var Series = H.Series,
-            Reingold = H.layouts['reingold-fruchterman'],
+        var Reingold = H.layouts['reingold-fruchterman'],
             dragNodesMixin = H.dragNodesMixin;
         /**
          * Formatter callback function.
@@ -8861,21 +8873,21 @@
                 return allDataPoints;
             },
             init: function () {
-                Series.prototype.init.apply(this, arguments);
+                LineSeries.prototype.init.apply(this, arguments);
                 // When one series is modified, the others need to be recomputed
-                addEvent(this, 'updatedData', function () {
+                this.eventsToUnbind.push(addEvent(this, 'updatedData', function () {
                     this.chart.series.forEach(function (s) {
                         if (s.type === this.type) {
                             s.isDirty = true;
                         }
                     }, this);
-                });
+                }));
                 return this;
             },
             render: function () {
                 var series = this,
                     dataLabels = [];
-                Series.prototype.render.apply(this, arguments);
+                LineSeries.prototype.render.apply(this, arguments);
                 // #10823 - dataLabels should stay visible
                 // when enabled allowOverlap.
                 if (!series.options.dataLabels.allowOverlap) {
@@ -8897,7 +8909,7 @@
             // Needed because of z-indexing issue if point is added in series.group
             setVisible: function () {
                 var series = this;
-                Series.prototype.setVisible.apply(series, arguments);
+                LineSeries.prototype.setVisible.apply(series, arguments);
                 if (series.parentNodeLayout && series.graph) {
                     if (series.visible) {
                         series.graph.show();
@@ -8931,14 +8943,14 @@
                 var textPath = this.options.dataLabels.textPath,
                     points = this.points;
                 // Render node labels:
-                Series.prototype.drawDataLabels.apply(this, arguments);
+                LineSeries.prototype.drawDataLabels.apply(this, arguments);
                 // Render parentNode labels:
                 if (this.parentNode) {
                     this.parentNode.formatPrefix = 'parentNode';
                     this.points = [this.parentNode];
                     this.options.dataLabels.textPath =
                         this.options.dataLabels.parentNodeTextPath;
-                    Series.prototype.drawDataLabels.apply(this, arguments);
+                    LineSeries.prototype.drawDataLabels.apply(this, arguments);
                     // Restore nodes
                     this.points = points;
                     this.options.dataLabels.textPath = textPath;
@@ -9633,9 +9645,9 @@
                             this.parentNode.dataLabel.destroy();
                     }
                 }
-                H.Series.prototype.destroy.apply(this, arguments);
+                LineSeries.prototype.destroy.apply(this, arguments);
             },
-            alignDataLabel: H.Series.prototype.alignDataLabel
+            alignDataLabel: LineSeries.prototype.alignDataLabel
         }, {
             /**
              * Destroy point.
@@ -9745,7 +9757,7 @@
         ''; // adds doclets above to transpiled file
 
     });
-    _registerModule(_modules, 'Extensions/Polar.js', [_modules['Core/Animation/AnimationUtilities.js'], _modules['Core/Chart/Chart.js'], _modules['Core/Globals.js'], _modules['Extensions/Pane.js'], _modules['Core/Pointer.js'], _modules['Core/Renderer/SVG/SVGRenderer.js'], _modules['Core/Utilities.js']], function (A, Chart, H, Pane, Pointer, SVGRenderer, U) {
+    _registerModule(_modules, 'Extensions/Polar.js', [_modules['Core/Animation/AnimationUtilities.js'], _modules['Core/Series/Series.js'], _modules['Core/Chart/Chart.js'], _modules['Core/Globals.js'], _modules['Series/Line/LineSeries.js'], _modules['Extensions/Pane.js'], _modules['Core/Pointer.js'], _modules['Core/Renderer/SVG/SVGRenderer.js'], _modules['Core/Utilities.js']], function (A, BaseSeries, Chart, H, LineSeries, Pane, Pointer, SVGRenderer, U) {
         /* *
          *
          *  (c) 2010-2020 Torstein Honsi
@@ -9756,6 +9768,7 @@
          *
          * */
         var animObject = A.animObject;
+        var seriesTypes = BaseSeries.seriesTypes;
         var addEvent = U.addEvent,
             defined = U.defined,
             find = U.find,
@@ -9766,11 +9779,9 @@
             wrap = U.wrap;
         // Extensions for polar charts. Additionally, much of the geometry required for
         // polar charts is gathered in RadialAxes.js.
-        var Series = H.Series,
-            seriesTypes = H.seriesTypes,
-            seriesProto = Series.prototype,
+        var seriesProto = LineSeries.prototype,
             pointerProto = Pointer.prototype,
-            colProto,
+            columnProto,
             arearangeProto;
         /* eslint-disable no-invalid-this, valid-jsdoc */
         /**
@@ -9963,7 +9974,7 @@
          * and (yAxis.len - plotY) is the pixel distance from center.
          * @private
          */
-        addEvent(Series, 'afterTranslate', function () {
+        addEvent(LineSeries, 'afterTranslate', function () {
             var series = this;
             var chart = series.chart;
             if (chart.polar && series.xAxis) {
@@ -10172,8 +10183,8 @@
         wrap(seriesProto, 'animate', polarAnimate);
         if (seriesTypes.column) {
             arearangeProto = seriesTypes.arearange.prototype;
-            colProto = seriesTypes.column.prototype;
-            colProto.polarArc = function (low, high, start, end) {
+            columnProto = seriesTypes.column.prototype;
+            columnProto.polarArc = function (low, high, start, end) {
                 var center = this.xAxis.center,
                     len = this.yAxis.len,
                     paneInnerR = center[3] / 2,
@@ -10203,12 +10214,12 @@
              * Define the animate method for columnseries
              * @private
              */
-            wrap(colProto, 'animate', polarAnimate);
+            wrap(columnProto, 'animate', polarAnimate);
             /**
              * Extend the column prototype's translate method
              * @private
              */
-            wrap(colProto, 'translate', function (proceed) {
+            wrap(columnProto, 'translate', function (proceed) {
                 var series = this,
                     options = series.options,
                     threshold = options.threshold,
@@ -10384,7 +10395,7 @@
              * Find correct align and vertical align based on an angle in polar chart
              * @private
              */
-            colProto.findAlignments = function (angle, options) {
+            columnProto.findAlignments = function (angle, options) {
                 var align,
                     verticalAlign;
                 if (options.align === null) {
@@ -10414,13 +10425,13 @@
                 return options;
             };
             if (arearangeProto) {
-                arearangeProto.findAlignments = colProto.findAlignments;
+                arearangeProto.findAlignments = columnProto.findAlignments;
             }
             /**
              * Align column data labels outside the columns. #1199.
              * @private
              */
-            wrap(colProto, 'alignDataLabel', function (proceed, point, dataLabel, options, alignTo, isNew) {
+            wrap(columnProto, 'alignDataLabel', function (proceed, point, dataLabel, options, alignTo, isNew) {
                 var chart = this.chart,
                     inside = pick(options.inside, !!this.options.stacking),
                     angle,
@@ -10543,7 +10554,7 @@
                 pane.render();
             });
         });
-        addEvent(H.Series, 'afterInit', function () {
+        addEvent(LineSeries, 'afterInit', function () {
             var chart = this.chart;
             // Add flags that identifies radial inverted series
             if (chart.inverted && chart.polar) {

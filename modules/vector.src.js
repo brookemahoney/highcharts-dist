@@ -1,5 +1,5 @@
 /**
- * @license Highcharts JS v8.2.2 (2020-10-22)
+ * @license Highcharts JS v8.2.2 (2020-11-05)
  *
  * Vector plot series module
  *
@@ -28,7 +28,7 @@
             obj[path] = fn.apply(null, args);
         }
     }
-    _registerModule(_modules, 'Series/VectorSeries.js', [_modules['Core/Animation/AnimationUtilities.js'], _modules['Core/Series/Series.js'], _modules['Core/Globals.js'], _modules['Core/Utilities.js']], function (A, BaseSeries, H, U) {
+    _registerModule(_modules, 'Series/VectorSeries.js', [_modules['Core/Animation/AnimationUtilities.js'], _modules['Core/Series/Series.js'], _modules['Core/Globals.js'], _modules['Series/Line/LineSeries.js'], _modules['Core/Utilities.js']], function (A, BaseSeries, H, LineSeries, U) {
         /* *
          *
          *  Vector plot series module
@@ -191,7 +191,7 @@
              * @function Highcharts.seriesTypes.vector#translate
              */
             translate: function () {
-                H.Series.prototype.translate.call(this);
+                LineSeries.prototype.translate.call(this);
                 this.lengthMax = arrayMax(this.lengthData);
             },
             /**

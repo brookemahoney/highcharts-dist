@@ -1,5 +1,5 @@
 /**
- * @license Highcharts JS v8.2.2 (2020-10-22)
+ * @license Highcharts JS v8.2.2 (2020-11-05)
  *
  * (c) 2016-2019 Highsoft AS
  * Authors: Jon Arild Nygard
@@ -433,7 +433,7 @@
 
         return collision;
     });
-    _registerModule(_modules, 'Series/WordcloudSeries.js', [_modules['Core/Series/Series.js'], _modules['Mixins/DrawPoint.js'], _modules['Core/Globals.js'], _modules['Mixins/Polygon.js'], _modules['Core/Utilities.js']], function (BaseSeries, DrawPointMixin, H, PolygonMixin, U) {
+    _registerModule(_modules, 'Series/WordcloudSeries.js', [_modules['Core/Series/Series.js'], _modules['Mixins/DrawPoint.js'], _modules['Core/Globals.js'], _modules['Series/Line/LineSeries.js'], _modules['Mixins/Polygon.js'], _modules['Core/Utilities.js']], function (BaseSeries, DrawPointMixin, H, LineSeries, PolygonMixin, U) {
         /* *
          *
          *  Experimental Highcharts module which enables visualization of a word cloud.
@@ -459,7 +459,6 @@
             isNumber = U.isNumber,
             isObject = U.isObject,
             merge = U.merge;
-        var Series = H.Series;
         /**
          * Detects if there is a collision between two rectangles.
          *
@@ -1099,7 +1098,7 @@
             };
         // Properties of the WordCloud series.
         var wordCloudSeries = {
-                animate: Series.prototype.animate,
+                animate: LineSeries.prototype.animate,
                 animateDrilldown: noop,
                 animateDrillupFrom: noop,
                 setClip: noop,
@@ -1113,7 +1112,7 @@
                         title: null,
                         tickPositions: []
                     };
-                Series.prototype.bindAxes.call(this);
+                LineSeries.prototype.bindAxes.call(this);
                 extend(this.yAxis.options, wordcloudAxis);
                 extend(this.xAxis.options, wordcloudAxis);
             },
